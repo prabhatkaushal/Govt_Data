@@ -17,10 +17,10 @@ Target users include Investigating Officers, Legal Counsel, Forensics, and Audit
 | Confidentiality & Access Control | Role-Based Access Control (RBAC) linking Users to Departments. | IMPLEMENTED | `api.models.User`, Django Permissions |
 | Unauthorized modification protection | Calculates SHA-256 hash upon upload; enforces append-only versioning. | IMPLEMENTED | `api.models.DocumentVersion`, `api.models.Document` |
 | Version control | Prevents overwriting; saves updates as new `DocumentVersion`. | IMPLEMENTED | `api.models.DocumentVersion` |
-| Auditability | `AuditLog` captures actions across the system. | PARTIALLY IMPLEMENTED | `api.models.AuditLog` (Model exists, middleware needs expansion) |
-| Evidence integrity & Chain of Custody | `EvidenceChain` tracks the exact lifecycle (view, upload, sign) of a document. | IMPLEMENTED | `api.models.EvidenceChain` |
-| Digital signatures | `DigitalSignature` model captures cryptographic hashes and signer data. | PLACEHOLDER / MOCK | `api.models.DigitalSignature` (Uses mocked signature algorithm) |
-| Blockchain | `BlockchainRecord` mimics a linked ledger mapping document hashes. | PLACEHOLDER / MOCK | `api.models.BlockchainRecord` (Local DB simulation) |
+| Auditability | `AuditLog` captures actions across the system. | PARTIALLY IMPLEMENTED | `api.models.AuditLog` |
+| Evidence integrity & Chain of Custody | `EvidenceChain` tracks the exact lifecycle of a document. | IMPLEMENTED | `api.models.EvidenceChain` |
+| Digital signatures | `DigitalSignature` model captures cryptographic hashes and signer data. | PLACEHOLDER / MOCK | `api.models.DigitalSignature` |
+| Blockchain | `BlockchainRecord` mimics a linked ledger mapping document hashes. | PLACEHOLDER / MOCK | `api.models.BlockchainRecord` |
 | AI/OCR | Text extraction and semantic classification. | NOT IMPLEMENTED | - |
 | Search | Global search filtering across cases and documents. | PARTIALLY IMPLEMENTED | `api.views` basic filtering |
 
@@ -32,7 +32,7 @@ Target users include Investigating Officers, Legal Counsel, Forensics, and Audit
 | Styling | Tailwind CSS, shadcn/ui | Cybersecurity-grade aesthetic | `frontend/src/components` |
 | Backend | Django, Django REST Framework | Robust MVC API and ORM | `backend/` |
 | Database | SQLite (Dev) / PostgreSQL (Prod Target) | Relational data persistence | `backend/core/settings.py` |
-| Authentication | Django Session/Tokens (JWT planned) | User session management | `backend/api/models.User` |
+| Authentication | Django Session/Tokens | User session management | `backend/api/models.User` |
 | File storage | Local File System | Storing uploaded documents | Django Media Root |
 | Blockchain | Relational Table Simulator | Simulating immutable blocks | `backend/api/models.BlockchainRecord` |
 | Containerization | Docker & Docker Compose | Consistent deployment | `docker-compose.yml`, `backend/Dockerfile` |
@@ -73,7 +73,7 @@ project/
 |---|---|---|---|
 | `api/models.py` | Defines the entire database schema | `Case`, `Document`, `EvidenceChain`, `BlockchainRecord` | Django ORM |
 | `api/views.py` | Handles incoming HTTP requests | `CaseViewSet`, `DocumentViewSet` | `api/serializers.py` |
-| `frontend/src/app/documents/page.tsx` | UI for listing and filtering evidence | File mapping, status badges | `lucide-react`, Tailwind |
+| `frontend/src/app/documents/page.tsx` | UI for listing evidence | File mapping, status badges | `lucide-react`, Tailwind |
 | `frontend/src/components/layout/Sidebar.tsx` | Main navigation shell | Routing, contextual case menus | Next.js Router |
 
 ## PART 5 — SYSTEM ARCHITECTURE
@@ -100,8 +100,6 @@ flowchart TD
 
 **UI Flow:**
 Login (`/login`) -> Dashboard (`/dashboard`) -> Cases (`/cases`) -> Documents (`/documents`)
-
-*Not Implemented:* Advanced Document Viewer modal, Blockchain Verification UI screen, Evidence transfer UI.
 
 ## PART 7 — BACKEND ARCHITECTURE
 
@@ -143,23 +141,20 @@ erDiagram
 8. `BlockchainRecord` model creates a new block linking the document hash to the previous block's hash.
 9. `EvidenceChain` records the "UPLOAD" action.
 
-*(Note: The Django backend models exist for this, but the exact ViewSet implementation for multipart handling is partially mocked/incomplete in the current iteration).*
-
 ## PART 10 — DOCUMENT SECURITY
 
 | Security Layer | Implementation | Code Location | Status |
 | -------------- | -------------- | ------------- | ------ |
-| Password Hashing | Django `AbstractUser` PBKDF2 | `api/models.py` | ✅ IMPLEMENTED |
-| JWT/Session Auth | Django Sessions / Basic Auth | `core/settings.py` | ⚠️ PARTIAL |
-| RBAC | `RoleEnum` choices in `User` model | `api/models.py` | ⚠️ PARTIAL |
-| File Validation | File extensions/MIME checks | `api/views.py` | ❌ NOT IMPLEMENTED |
-| XSS/CSRF | Django built-in middleware | `core/settings.py` | ✅ IMPLEMENTED |
+| Password Hashing | Django `AbstractUser` PBKDF2 | `api/models.py` | IMPLEMENTED |
+| JWT/Session Auth | Django Sessions / Basic Auth | `core/settings.py` | PARTIAL |
+| RBAC | `RoleEnum` choices in `User` model | `api/models.py` | PARTIAL |
+| File Validation | File extensions/MIME checks | `api/views.py` | NOT IMPLEMENTED |
+| XSS/CSRF | Django built-in middleware | `core/settings.py` | IMPLEMENTED |
 
 ## PART 11 — HASHING AND TAMPER DETECTION
 
 **Algorithm:** SHA-256.
-**How it works:** When a document is uploaded, the binary data is passed through a SHA-256 hashing function to create a unique 64-character string (Hash A). This string is saved in the database. If a user or admin secretly alters the file on the hard drive, passing the modified file through SHA-256 will produce a completely different string (Hash B). 
-Because Hash A != Hash B, the system flags the document as **COMPROMISED**.
+**How it works:** When a document is uploaded, the binary data is passed through a SHA-256 hashing function to create a unique 64-character string (Hash A). This string is saved in the database. If a user or admin secretly alters the file on the hard drive, passing the modified file through SHA-256 will produce a completely different string (Hash B). Because Hash A != Hash B, the system flags the document as **COMPROMISED**.
 
 ## PART 12 — BLOCKCHAIN
 
@@ -174,7 +169,7 @@ Currently represented by the `DigitalSignature` model.
 *Difference:* 
 - **Hashing** proves a file hasn't changed.
 - **Blockchain** proves *when* the hash existed.
-- **Digital Signatures** prove *who* approved the document using Cryptographic Key Pairs (Private/Public keys).
+- **Digital Signatures** prove *who* approved the document using Cryptographic Key Pairs.
 
 ## PART 14 — EVIDENCE MANAGEMENT
 
@@ -183,15 +178,15 @@ Tracked via the `EvidenceChain` Django model. Records `action` (e.g., UPLOADED, 
 
 ## PART 15 — OCR AND AI
 
-**Status:** ❌ NOT IMPLEMENTED. Planned for future phases.
+**Status:** NOT IMPLEMENTED. Planned for future phases.
 
 ## PART 16 — SEARCH SYSTEM
 
-**Status:** ⚠️ PARTIALLY IMPLEMENTED. Basic Django ORM text filtering exists, but advanced semantic search is pending.
+**Status:** PARTIALLY IMPLEMENTED. Basic Django ORM text filtering exists, but advanced semantic search is pending.
 
 ## PART 17 — AUDIT TRAIL
 
-**Status:** ⚠️ PARTIALLY IMPLEMENTED. The `AuditLog` model exists in Django, capturing Actor, Action, Resource, IP, and Device Info. 
+**Status:** PARTIALLY IMPLEMENTED. The `AuditLog` model exists in Django, capturing Actor, Action, Resource, IP, and Device Info. 
 
 ## PART 18 — ROLE AND PERMISSION SYSTEM
 
@@ -231,7 +226,7 @@ A secure, tamper-evident digital platform for managing legal and evidentiary doc
 ### Slide 5 — System Architecture
 - Django Backend, Next.js Frontend, local cryptographic hashing, simulated block ledger.
 ### Slide 8 — Document Lifecycle
-Upload → SHA-256 Hash → Storage → Blockchain Anchor → Verification.
+Upload -> SHA-256 Hash -> Storage -> Blockchain Anchor -> Verification.
 
 ## PART 23 — LIKELY JUDGE QUESTIONS
 
@@ -275,20 +270,20 @@ Upload → SHA-256 Hash → Storage → Blockchain Anchor → Verification.
    ```
 
 ## PART 27 — TESTING
-**Status:** ❌ NOT IMPLEMENTED. (Basic placeholder `tests.py` exists in Django, but no comprehensive unit or integration tests are currently authored).
+**Status:** NOT IMPLEMENTED. (Basic placeholder `tests.py` exists in Django, but no comprehensive tests are currently authored).
 
 ## PART 28 — CURRENT IMPLEMENTATION STATUS
 
 | Feature           | Status | Evidence in Code | Notes |
 | ----------------- | ------ | ---------------- | ----- |
-| Authentication    | ⚠️      | `core/settings.py` | Basic Django Auth |
-| RBAC              | ⚠️      | `api/models.py`  | Models exist, logic pending |
-| Document upload   | ⚠️      | `api/views.py`   | Endpoint defined, multipart logic pending |
-| Hashing           | ✅      | `api/models.py`  | Hash field integrated |
-| Version control   | ✅      | `api/models.py`  | `DocumentVersion` model |
-| Blockchain        | ⚠️      | `api/models.py`  | Local DB table simulator |
-| AI / OCR          | ❌      | -                | Not implemented |
-| Chain of custody  | ✅      | `api/models.py`  | `EvidenceChain` model |
+| Authentication    | PARTIAL | `core/settings.py` | Basic Django Auth |
+| RBAC              | PARTIAL | `api/models.py`  | Models exist, logic pending |
+| Document upload   | PARTIAL | `api/views.py`   | Endpoint defined, multipart logic pending |
+| Hashing           | IMPLEMENTED | `api/models.py`  | Hash field integrated |
+| Version control   | IMPLEMENTED | `api/models.py`  | `DocumentVersion` model |
+| Blockchain        | PARTIAL | `api/models.py`  | Local DB table simulator |
+| AI / OCR          | NOT IMPLEMENTED | -        | Not implemented |
+| Chain of custody  | IMPLEMENTED | `api/models.py`  | `EvidenceChain` model |
 
 ## PART 29 — PRODUCTION GAPS
 Before real law-enforcement deployment, the system requires:
@@ -296,7 +291,6 @@ Before real law-enforcement deployment, the system requires:
 - Transition from DB Blockchain Simulator to a real Hyperledger Fabric node.
 - Integration of a Hardware Security Module (HSM) for key management.
 - Real PKI integration (e.g., Aadhaar eSign) for digital signatures.
-- Comprehensive unit testing and penetration testing.
 
 ## PART 30 — FINAL PROJECT SUMMARY
 
@@ -305,12 +299,11 @@ NyayaVault is a robust Django/Next.js prototype demonstrating how cryptographic 
 **30-second explanation:**
 "NyayaVault centralizes police and legal documents into a highly secure vault. Instead of just saving files, it mathematically hashes them and logs every single interaction into an immutable chain of custody, ensuring that no evidence can be secretly tampered with or viewed by unauthorized personnel."
 
- #   C O D E B A S E   - >   P P T   M A P P I N G 
- 
- |   P P T   S l i d e   |   F e a t u r e   B e i n g   D e m o n s t r a t e d   |   A c t u a l   C o d e   F i l e s   |   D e m o   S c r e e n   |   T e c h n i c a l   C o n c e p t   | 
- | - - - | - - - | - - - | - - - | - - - | 
- |   S y s t e m   A r c h i t e c t u r e   |   F r o n t e n d / B a c k e n d   s e p a r a t i o n   |    a c k e n d / c o r e / s e t t i n g s . p y ,    r o n t e n d / s r c / a p p   |   N / A   |   R E S T   A P I   a r c h i t e c t u r e   | 
- |   D o c u m e n t   L i f e c y c l e   |   A p p e n d - o n l y   v e r s i o n s   |    a c k e n d / a p i / m o d e l s . p y   ( D o c u m e n t V e r s i o n )   |   / d o c u m e n t s   |   V e r s i o n   c o n t r o l   | 
- |   B l o c k c h a i n   |   C r y p t o g r a p h i c   h a s h i n g   |    a c k e n d / a p i / m o d e l s . p y   ( B l o c k c h a i n R e c o r d )   |   / d o c u m e n t s   |   D a t a   i n t e g r i t y   | 
- |   E v i d e n c e   &   C h a i n   o f   C u s t o d y   |   I m m u t a b l e   a u d i t   l o g   |    a c k e n d / a p i / m o d e l s . p y   ( E v i d e n c e C h a i n )   |   / c a s e s   |   A c c o u n t a b i l i t y   |  
- 
+# CODEBASE -> PPT MAPPING
+
+| PPT Slide | Feature Being Demonstrated | Actual Code Files | Demo Screen | Technical Concept |
+|---|---|---|---|---|
+| System Architecture | Frontend/Backend separation | `backend/core/settings.py`, `frontend/src/app` | N/A | REST API architecture |
+| Document Lifecycle | Append-only versions | `backend/api/models.py` (`DocumentVersion`) | `/documents` | Version control |
+| Blockchain | Cryptographic hashing | `backend/api/models.py` (`BlockchainRecord`) | `/documents` | Data integrity |
+| Evidence & Custody | Immutable audit log | `backend/api/models.py` (`EvidenceChain`) | `/cases` | Accountability |
