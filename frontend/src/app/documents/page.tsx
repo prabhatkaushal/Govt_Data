@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface DocumentItem {
   id: string;
@@ -20,20 +21,31 @@ interface DocumentItem {
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isInvestigator, isLawyer } = useAuth();
+
+  const fetchDocs = async () => {
+    try {
+      const res = await api.get('/documents/');
+      setDocuments(res.data);
+    } catch (err) {
+      console.error("Failed to fetch documents", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        const res = await api.get('/documents/');
-        setDocuments(res.data);
-      } catch (err) {
-        console.error("Failed to fetch documents", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDocs();
   }, []);
+
+  const handleVerify = async (id: string) => {
+    try {
+      await api.post(`/documents/${id}/verify/`);
+      await fetchDocs(); // Refresh list after verifying
+    } catch (err) {
+      console.error("Failed to verify", err);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -42,9 +54,11 @@ export default function DocumentsPage() {
           <h1 className="text-3xl font-bold text-white tracking-tight">Documents</h1>
           <p className="text-slate-400 mt-1">Secure document vault with blockchain verification.</p>
         </div>
-        <Link href="/documents/upload" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-          + Upload Document
-        </Link>
+        {isInvestigator && (
+          <Link href="/documents/upload" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+            + Upload Document
+          </Link>
+        )}
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
@@ -104,11 +118,19 @@ export default function DocumentsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{new Date(doc.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link href={`/documents/${doc.id}`} className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
-                        View Details →
-                      </Link>
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3">
+                    {isLawyer && doc.status !== 'ACTIVE' && (
+                      <button 
+                        onClick={() => handleVerify(doc.id)} 
+                        className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                      >
+                        Verify
+                      </button>
+                    )}
+                    <Link href={`/documents/${doc.id}`} className="text-slate-400 hover:text-white transition-colors">
+                      View Details →
+                    </Link>
+                  </td>
                   </tr>
                 ))}
               </tbody>

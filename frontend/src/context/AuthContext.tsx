@@ -10,6 +10,8 @@ interface AuthContextType {
   login: (idNumber: string, passcode: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isInvestigator: boolean;
+  isLawyer: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,8 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
+  const isInvestigator = user?.role === 'INVESTIGATING_OFFICER' || user?.role === 'SUPER_ADMIN';
+  const isLawyer = user?.role === 'LEGAL_OFFICER' || user?.role === 'SUPER_ADMIN';
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading, isInvestigator, isLawyer }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isInvestigator } = useAuth();
 
-  const navItems = [
+  const allNavItems = [
     { name: "Dashboard", href: "/dashboard", icon: "📊" },
     { name: "Cases", href: "/cases", icon: "📁" },
     { name: "Documents", href: "/documents", icon: "📄" },
-    { name: "Upload Document", href: "/documents/upload", icon: "📤" },
+    { name: "Upload Document", href: "/documents/upload", icon: "📤", investigatorOnly: true },
   ];
+
+  const navItems = allNavItems.filter(item => !item.investigatorOnly || isInvestigator);
 
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 hidden md:flex flex-col">
