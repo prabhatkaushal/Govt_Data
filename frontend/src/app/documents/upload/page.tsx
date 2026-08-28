@@ -3,9 +3,45 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import api from "@/lib/api";
+import { useRouter } from "next/navigation";
+
 export default function DocumentUploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [caseId, setCaseId] = useState("");
+  const [confidentiality, setConfidentiality] = useState("unclassified");
+  const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return alert("Please select a file");
+
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+    formData.append("document_type", documentType);
+    if (caseId) formData.append("case", caseId);
+    formData.append("confidentiality_level", confidentiality);
+    formData.append("remarks", remarks);
+
+    try {
+      await api.post("/documents/", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      router.push("/documents");
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("Failed to upload document");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -20,19 +56,25 @@ export default function DocumentUploadPage() {
         <p className="text-slate-400 mt-1">Submit new evidence or documentation for secure processing and hashing.</p>
       </div>
 
-      <form className="bg-slate-900 border border-slate-800 rounded-lg p-8 space-y-8 shadow-sm">
+      <form onSubmit={handleUpload} className="bg-slate-900 border border-slate-800 rounded-lg p-8 space-y-8 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300">Document Title</label>
             <input 
               type="text" 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
               placeholder="e.g. Server Audit Log"
               className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300">Document Type</label>
-            <select className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <select 
+              value={documentType}
+              onChange={(e) => setDocumentType(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
               <option value="">Select type...</option>
               <option value="log">Log File</option>
               <option value="report">Report (PDF)</option>
@@ -43,16 +85,21 @@ export default function DocumentUploadPage() {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300">Associated Case (Optional)</label>
-            <select className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <select 
+              value={caseId}
+              onChange={(e) => setCaseId(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
               <option value="">Select a case...</option>
-              <option value="CASE-0092">CASE-0092: Operation Northern Light</option>
-              <option value="CASE-0091">CASE-0091: Cybercom Audit Q3</option>
-              <option value="CASE-0089">CASE-0089: Vendor Risk Assessment</option>
+              <option value="1">CASE-0092: Operation Northern Light</option>
+              <option value="2">CASE-0091: Cybercom Audit Q3</option>
             </select>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300">Confidentiality Level</label>
-            <select className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <select 
+              value={confidentiality}
+              onChange={(e) => setConfidentiality(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
               <option value="unclassified">Unclassified</option>
               <option value="confidential">Confidential</option>
               <option value="secret">Secret</option>
@@ -87,7 +134,7 @@ export default function DocumentUploadPage() {
                   className="relative cursor-pointer rounded-md font-semibold text-blue-500 focus-within:outline-none hover:text-blue-400"
                 >
                   <span>Upload a file</span>
-                  <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                  <input id="file-upload" name="file-upload" type="file" required className="sr-only" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
@@ -102,6 +149,8 @@ export default function DocumentUploadPage() {
           <label className="text-sm font-medium text-slate-300">Remarks / Chain of Custody Note</label>
           <textarea 
             rows={4}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
             placeholder="Provide any additional context or remarks about this document's acquisition..."
             className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           ></textarea>
@@ -111,8 +160,8 @@ export default function DocumentUploadPage() {
           <Link href="/documents" className="px-6 py-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white transition-colors">
             Cancel
           </Link>
-          <button type="button" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-md text-sm font-medium transition-colors shadow-sm">
-            Secure Upload & Hash
+          <button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-md text-sm font-medium transition-colors shadow-sm disabled:opacity-50">
+            {loading ? "Uploading..." : "Secure Upload & Hash"}
           </button>
         </div>
       </form>
