@@ -1,21 +1,36 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
 
 interface Case {
   id: string;
+  case_number: string;
   title: string;
-  status: "Active" | "Closed" | "Pending";
-  classification: "Top Secret" | "Confidential" | "Unclassified";
-  date: string;
+  status: string;
+  confidentiality_level: string;
+  created_at: string;
 }
 
-const mockCases: Case[] = [
-  { id: "CASE-0092", title: "Operation Northern Light", status: "Active", classification: "Top Secret", date: "2023-10-12" },
-  { id: "CASE-0091", title: "Cybercom Audit Q3", status: "Active", classification: "Confidential", date: "2023-10-10" },
-  { id: "CASE-0089", title: "Vendor Risk Assessment", status: "Pending", classification: "Unclassified", date: "2023-10-05" },
-  { id: "CASE-0085", title: "Incident Response #441", status: "Closed", classification: "Top Secret", date: "2023-09-28" },
-];
-
 export default function CasesPage() {
+  const [cases, setCases] = useState<Case[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const res = await api.get('/cases/');
+        setCases(res.data);
+      } catch (err) {
+        console.error("Failed to fetch cases", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end">
@@ -44,52 +59,58 @@ export default function CasesPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-900/50 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400">
-                <th className="px-6 py-4 font-medium">Case ID</th>
-                <th className="px-6 py-4 font-medium">Title</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Classification</th>
-                <th className="px-6 py-4 font-medium">Date Opened</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800">
-              {mockCases.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-800/30 transition-colors group">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
-                    <Link href={`/cases/${c.id}`}>{c.id}</Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">{c.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                      c.status === 'Active' ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800' : 
-                      c.status === 'Pending' ? 'bg-amber-900/30 text-amber-400 border-amber-800' : 
-                      'bg-slate-800 text-slate-400 border-slate-700'
-                    }`}>
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
-                      c.classification === 'Top Secret' ? 'bg-red-900/50 text-red-400' :
-                      c.classification === 'Confidential' ? 'bg-blue-900/50 text-blue-400' :
-                      'bg-slate-800 text-slate-400'
-                    }`}>
-                      {c.classification.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{c.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link href={`/cases/${c.id}`} className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
-                      View Details →
-                    </Link>
-                  </td>
+          {loading ? (
+            <div className="p-8 text-center text-slate-400">Loading cases...</div>
+          ) : cases.length === 0 ? (
+            <div className="p-8 text-center text-slate-400">No cases found.</div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-900/50 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400">
+                  <th className="px-6 py-4 font-medium">Case ID</th>
+                  <th className="px-6 py-4 font-medium">Title</th>
+                  <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 font-medium">Classification</th>
+                  <th className="px-6 py-4 font-medium">Date Opened</th>
+                  <th className="px-6 py-4 font-medium text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {cases.map((c) => (
+                  <tr key={c.id} className="hover:bg-slate-800/30 transition-colors group">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
+                      <Link href={`/cases/${c.id}`}>{c.case_number}</Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">{c.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                        c.status === 'UNDER_INVESTIGATION' ? 'bg-amber-900/30 text-amber-400 border-amber-800' : 
+                        c.status === 'OPEN' ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800' : 
+                        'bg-slate-800 text-slate-400 border-slate-700'
+                      }`}>
+                        {c.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
+                        c.confidentiality_level === 'TOP_SECRET' ? 'bg-red-900/50 text-red-400' :
+                        c.confidentiality_level === 'CONFIDENTIAL' ? 'bg-blue-900/50 text-blue-400' :
+                        'bg-slate-800 text-slate-400'
+                      }`}>
+                        {c.confidentiality_level.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{new Date(c.created_at).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Link href={`/cases/${c.id}`} className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                        View Details →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

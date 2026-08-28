@@ -3,13 +3,29 @@
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
-import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && pathname !== "/login") {
+      router.push("/login");
+    }
+  }, [isAuthenticated, isLoading, pathname, router]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+  }
 
   if (!isAuthenticated) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Please log in... (dummy login)</div>;
+    if (pathname === "/login") {
+      return <>{children}</>;
+    }
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Redirecting to login...</div>;
   }
 
   return (

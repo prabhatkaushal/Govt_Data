@@ -24,11 +24,11 @@ export function Topbar() {
 
         <div className="flex items-center gap-3 pl-6 border-l border-slate-800">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-slate-200">{user?.name}</p>
+            <p className="text-sm font-medium text-white">{user?.full_name || user?.username || "User"}</p>
             <p className="text-xs text-slate-400">{user?.role}</p>
           </div>
           <div className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold border-2 border-slate-700">
-            {user?.name.charAt(0)}
+            {user?.full_name?.charAt(0) || user?.username?.charAt(0) || "U"}
           </div>
           <button 
             onClick={logout}
