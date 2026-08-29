@@ -119,6 +119,85 @@ export default function DocumentDetailView({
             </div>
           </div>
         )}
+        {activeTab === "Blockchain Trace" && (
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
+              <Activity className="w-4 h-4 text-accent" /> Hyperledger Fabric Trace
+            </h3>
+            <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border bg-elevated/20 text-[10px] font-bold text-content-muted tracking-[0.12em] uppercase">
+                    <th className="px-6 py-4 font-normal">Transaction ID</th>
+                    <th className="px-6 py-4 font-normal">Action</th>
+                    <th className="px-6 py-4 font-normal">Timestamp</th>
+                    <th className="px-6 py-4 font-normal">Actor</th>
+                    <th className="px-6 py-4 font-normal text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50 font-mono text-xs">
+                  <tr className="hover:bg-elevated/40 transition-colors">
+                    <td className="px-6 py-4 text-accent">TXN-8A9B23C4</td>
+                    <td className="px-6 py-4 text-content-primary">UPLOAD_ENCRYPTED</td>
+                    <td className="px-6 py-4 text-content-secondary">2026-08-30 00:15:22</td>
+                    <td className="px-6 py-4 text-content-secondary">26010001 (Cyber)</td>
+                    <td className="px-6 py-4 text-right text-status-verification">COMMITTED</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "Audit Trail" && (
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
+              <Lock className="w-4 h-4 text-accent" /> Access Audit Log
+            </h3>
+            <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border bg-elevated/20 text-[10px] font-bold text-content-muted tracking-[0.12em] uppercase">
+                    <th className="px-6 py-4 font-normal">Action</th>
+                    <th className="px-6 py-4 font-normal">User (Role)</th>
+                    <th className="px-6 py-4 font-normal">IP Address</th>
+                    <th className="px-6 py-4 font-normal">Timestamp</th>
+                    <th className="px-6 py-4 font-normal text-right">Result</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50 text-sm">
+                  <tr className="hover:bg-elevated/40 transition-colors">
+                    <td className="px-6 py-4 text-content-primary font-bold">VIEW_DOCUMENT</td>
+                    <td className="px-6 py-4 text-content-secondary">Investigator (Cyber)</td>
+                    <td className="px-6 py-4 text-content-muted font-mono text-xs">192.168.1.105</td>
+                    <td className="px-6 py-4 text-content-muted font-mono text-xs">Just now</td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-[2px] border text-status-verification bg-status-verification/10 border-status-verification/20">SUCCESS</span>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-elevated/40 transition-colors">
+                    <td className="px-6 py-4 text-content-primary font-bold">DOWNLOAD_DOCUMENT</td>
+                    <td className="px-6 py-4 text-content-secondary">Unknown (Unauthenticated)</td>
+                    <td className="px-6 py-4 text-content-muted font-mono text-xs">45.22.19.112</td>
+                    <td className="px-6 py-4 text-content-muted font-mono text-xs">2 hours ago</td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-[2px] border text-status-critical bg-status-critical/10 border-status-critical/20">DENIED - RBAC</span>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-elevated/40 transition-colors">
+                    <td className="px-6 py-4 text-content-primary font-bold">VERIFY_SIGNATURE</td>
+                    <td className="px-6 py-4 text-content-secondary">Legal Officer (HQ)</td>
+                    <td className="px-6 py-4 text-content-muted font-mono text-xs">10.0.0.5</td>
+                    <td className="px-6 py-4 text-content-muted font-mono text-xs">Yesterday</td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-[2px] border text-status-verification bg-status-verification/10 border-status-verification/20">SUCCESS</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -146,10 +146,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
         
         AuditLog.objects.create(
             action="UPLOAD_DOCUMENT",
-            user=request.user,
+            actor=request.user,
             resource_type="DOCUMENT",
             resource_id=doc_id,
-            description=f"Document {file_name} encrypted (AES-256) and uploaded to mock-S3. SHA256: {sha256_hex[:12]}..."
+            metadata_info={"description": f"Document {file_name} encrypted (AES-256) and uploaded to mock-S3. SHA256: {sha256_hex[:12]}..."}
         )
         
         headers = self.get_success_headers(serializer.data)
@@ -177,10 +177,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
         )
         AuditLog.objects.create(
             action="VERIFIED_DOCUMENT",
-            user=request.user,
+            actor=request.user,
             resource_type="DOCUMENT",
             resource_id=doc.document_id,
-            description=f"Document {doc.document_id} verified by {request.user.full_name}"
+            metadata_info={"description": f"Document {doc.document_id} verified by {request.user.full_name}"}
         )
         
         return Response({"status": "verified"})
