@@ -11,13 +11,28 @@ import { useTheme } from "next-themes";
 
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   
+  const isLegal = user?.role === 'LEGAL_OFFICER' || user?.username === '26010003' || user?.username?.includes('legal');
+  const isForensic = user?.role === 'FORENSIC_OFFICER' || user?.username === '26010002' || user?.username?.includes('forensic');
+  
+  const bgImage = isLegal ? "url('/bg-legal.jpg')" : 
+                  isForensic ? "url('/bg-forensic.jpg')" : 
+                  "url('/bg-inspector.jpg')";
+  
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (isLegal) {
+      document.body.classList.add('theme-legal');
+    } else {
+      document.body.classList.remove('theme-legal');
+    }
+  }, [isLegal]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && pathname !== "/login") {
@@ -56,7 +71,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             initial={{ scale: 1.05, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.15 }}
             transition={{ duration: 3, ease: "easeOut" }}
-            style={{ backgroundImage: "url('/bg-inspector.jpg')", mixBlendMode: 'screen' }}
+            style={{ backgroundImage: bgImage, mixBlendMode: 'screen' }}
           ></motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background opacity-90"></div>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-80"></div>
@@ -68,7 +83,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             initial={{ scale: 1.05, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.12 }}
             transition={{ duration: 3, ease: "easeOut" }}
-            style={{ backgroundImage: "url('/bg-inspector.jpg')", mixBlendMode: 'multiply' }}
+            style={{ backgroundImage: bgImage, mixBlendMode: 'multiply' }}
           ></motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background opacity-90"></div>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-60"></div>

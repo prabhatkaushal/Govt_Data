@@ -64,9 +64,14 @@ export default function LoginPage() {
             <h3 className="text-xs font-bold text-content-secondary tracking-widest uppercase flex items-center gap-2">
               <Lock className="w-3.5 h-3.5" /> Authentication Required
             </h3>
-            <p className="text-[10px] text-content-muted mt-2 font-mono uppercase tracking-widest leading-relaxed">
-              Enter credentials (e.g. 26010001 / gov123).
-            </p>
+            <div className="text-[9px] text-content-muted mt-3 font-mono uppercase tracking-widest leading-relaxed border border-border/50 rounded bg-background/50 p-3 space-y-1">
+              <div className="font-bold mb-2 text-content-primary">Demo Credentials (pass: gov123):</div>
+              <div className="flex justify-between"><span>Admin:</span><span className="text-accent">26000000</span></div>
+              <div className="flex justify-between"><span>Investigator:</span><span className="text-accent">26010001</span></div>
+              <div className="flex justify-between"><span>Forensic:</span><span className="text-accent">26010002</span></div>
+              <div className="flex justify-between"><span>Legal:</span><span className="text-accent">26010003</span></div>
+              <div className="flex justify-between"><span>Auditor:</span><span className="text-accent">26010004</span></div>
+            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">

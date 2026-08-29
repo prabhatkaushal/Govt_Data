@@ -41,6 +41,39 @@
     --status-blockchain: #0C8CE9;
   }
 
+  .theme-legal {
+    --background: #FDFBF7;
+    --surface: #FFFFFF;
+    --elevated: #FFFDF9;
+    --border: #E8E2D2;
+    --border-hover: #D8CEB8;
+    --content-primary: #382A1B;
+    --content-secondary: #6B5B4C;
+    --content-muted: #9E8E7D;
+    --accent: #B8860B;
+    --accent-hover: #8B6508;
+    --accent-muted: rgba(184, 134, 11, 0.1);
+  }
+
+  .dark .theme-legal {
+    --background: #110E0B;
+    --surface: #1C1713;
+    --elevated: #26201B;
+    --border: #3A322A;
+    --border-hover: #50453B;
+    --content-primary: #F4ECE1;
+    --content-secondary: #BFA992;
+    --content-muted: #807161;
+    --accent: #D4AF37;
+    --accent-hover: #F3E5AB;
+    --accent-muted: rgba(212, 175, 55, 0.1);
+  }
+
+  body.theme-legal {
+    --font-sans: var(--font-legal-sans);
+    --font-display: var(--font-legal-display);
+  }
+
   body {
     background-color: var(--background);
     color: var(--content-primary);
