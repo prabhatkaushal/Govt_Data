@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 
 
+import { useEffect } from "react";
+import { ShieldAlert } from "lucide-react";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -45,6 +47,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
         <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
         <p className="text-content-muted font-mono tracking-[0.2em] text-xs uppercase">Initializing System</p>
+      <div className="min-h-screen bg-[#0B0F17] flex flex-col items-center justify-center text-slate-200 gap-4">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="text-sm font-mono text-blue-400 animate-pulse">ESTABLISHING SECURE CONNECTION...</p>
       </div>
     );
   }
@@ -91,6 +96,19 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       ) : (
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-background"></div>
       )}
+    return (
+      <div className="min-h-screen bg-[#0B0F17] flex flex-col items-center justify-center text-slate-200 gap-4">
+        <ShieldAlert className="w-12 h-12 text-red-500 animate-pulse-glow" />
+        <p className="text-sm font-mono text-red-400">UNAUTHORIZED. REDIRECTING...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-[#0B0F17] overflow-hidden text-slate-200 selection:bg-blue-500/30">
+      {/* Background Cyber Effect */}
+      <div className="absolute inset-0 cyber-grid opacity-20 pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
       
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
@@ -109,6 +127,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             {children}
           </motion.main>
         </AnimatePresence>
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 scroll-smooth">
+          <div className="max-w-7xl mx-auto w-full animate-fade-in-up">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -134,4 +134,76 @@ input:focus, select:focus, textarea:focus, button:focus {
 /* Redefine shadow utility for a soft minimalist feel on cards */
 .shadow-premium {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[#0B0F17] text-slate-200 antialiased selection:bg-blue-500/30 selection:text-blue-200;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-slate-900/60 backdrop-blur-md border border-slate-800/80 shadow-lg;
+  }
+  .glass-panel-hover {
+    @apply hover:bg-slate-800/60 hover:border-slate-700 transition-all duration-300;
+  }
+  .badge-emerald {
+    @apply bg-emerald-950/40 text-emerald-400 border border-emerald-900/50 shadow-[0_0_10px_rgba(16,185,129,0.1)];
+  }
+  .badge-amber {
+    @apply bg-amber-950/40 text-amber-400 border border-amber-900/50 shadow-[0_0_10px_rgba(245,158,11,0.1)];
+  }
+  .badge-red {
+    @apply bg-red-950/40 text-red-400 border border-red-900/50 shadow-[0_0_10px_rgba(239,68,68,0.1)];
+  }
+  .badge-blue {
+    @apply bg-blue-950/40 text-blue-400 border border-blue-900/50 shadow-[0_0_10px_rgba(59,130,246,0.1)];
+  }
+  .cyber-grid {
+    background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* Custom Scrollbar for sleek look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5); 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 1); 
 }

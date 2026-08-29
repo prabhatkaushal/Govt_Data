@@ -23,77 +23,48 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+from .permissions import IsInvestigator, IsLegalOfficer, IsReadOnly
+
 class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all()
     serializer_class = CaseSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
+    http_method_names = ['get', 'post', 'head', 'options']
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
+    http_method_names = ['get', 'post', 'head', 'options']
 
-    def create(self, request, *args, **kwargs):
-        file_obj = request.FILES.get('file')
-        if not file_obj:
-            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
 
-        # Generate SHA-256
-        sha256 = hashlib.sha256()
-        for chunk in file_obj.chunks():
-            sha256.update(chunk)
-        file_hash = sha256.hexdigest()
-
-        # Save File locally
-        media_dir = getattr(settings, 'MEDIA_ROOT', 'media')
-        os.makedirs(media_dir, exist_ok=True)
-        unique_filename = f"{uuid.uuid4()}_{file_obj.name}"
-        file_path = os.path.join(media_dir, unique_filename)
-        with open(file_path, 'wb+') as destination:
-            for chunk in file_obj.chunks():
-                destination.write(chunk)
-
-        # Create Document
-        case_id = request.data.get('case')
-        case_instance = Case.objects.get(id=case_id) if case_id else None
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsLegalOfficer])
+    def verify(self, request, pk=None):
+        doc = self.get_object()
+        if doc.status == 'ACTIVE':
+            return Response({"error": "Already verified"}, status=status.HTTP_400_BAD_REQUEST)
         
-        doc = Document.objects.create(
-            document_id=str(uuid.uuid4()),
-            case=case_instance,
-            title=request.data.get('title', file_obj.name),
-            description=request.data.get('description', ''),
-            document_type=request.data.get('document_type', 'other'),
-            file_name=file_obj.name,
-            file_path=file_path,
-            file_size=file_obj.size,
-            mime_type=file_obj.content_type,
-            uploaded_by=request.user,
-            confidentiality_level=request.data.get('confidentiality_level', 'INTERNAL'),
-            sha256_hash=file_hash
-        )
-
-        # Create Version
-        DocumentVersion.objects.create(
+        doc.status = 'ACTIVE'
+        doc.save()
+        
+        # Add a digital signature and audit log automatically
+        DigitalSignature.objects.create(
             document=doc,
-            version_number=1,
-            file_path=file_path,
-            sha256_hash=file_hash,
-            change_description="Initial upload",
-            uploaded_by=request.user
+            signed_by=request.user,
+            signature=f"verified-by-{request.user.employee_id}",
+            document_hash=doc.sha256_hash or "mock-hash"
         )
-
-        # Create Evidence Chain
-        EvidenceChain.objects.create(
-            document=doc,
-            action="UPLOADED",
-            performed_by=request.user,
-            current_hash=file_hash,
-            remarks=request.data.get('remarks', '')
+        AuditLog.objects.create(
+            action="VERIFIED_DOCUMENT",
+            user=request.user,
+            resource_type="DOCUMENT",
+            resource_id=doc.document_id,
+            description=f"Document {doc.document_id} verified by {request.user.full_name}"
         )
-
-        serializer = self.get_serializer(doc)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response({"status": "verified"})
 
     @action(detail=True, methods=['post'])
     def sign(self, request, pk=None):

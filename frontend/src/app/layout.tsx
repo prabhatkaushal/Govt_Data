@@ -1,35 +1,15 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-import { Outfit, Syne, Cormorant_Garamond, Lora } from "next/font/google";
-
-const outfit = Outfit({ 
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-display",
-});
-
-const cormorant = Cormorant_Garamond({
-  weight: ['400', '600', '700'],
-  subsets: ["latin"],
-  variable: "--font-legal-display",
-});
-
-const lora = Lora({
-  weight: ['400', '500', '700'],
-  subsets: ["latin"],
-  variable: "--font-legal-sans",
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "SECURE-OPS | Government Portal",
-  description: "Secure Digital Document Management System for Law Enforcement",
+  title: "NyayaVault | Secure-Ops",
+  description: "Secure Government Intelligence & Evidence Portal",
 };
 
 export default function RootLayout({
@@ -38,11 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.variable} ${syne.variable} ${cormorant.variable} ${lora.variable} font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <AppLayout>{children}</AppLayout>
-        </ThemeProvider>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
+        <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );
