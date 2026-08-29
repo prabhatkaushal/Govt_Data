@@ -1,10 +1,11 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Search, Bell, LogOut, CheckCircle, ShieldCheck, X } from "lucide-react";
+import { Search, Bell, LogOut, CheckCircle, ShieldCheck, X, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 
 export function Topbar() {
   const { user, logout } = useAuth();
@@ -13,6 +14,14 @@ export function Topbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
   
   // Derive section title from pathname
   let pageTitle = "Command Center";
@@ -139,6 +148,17 @@ export function Topbar() {
         </div>
 
         <div className="h-4 w-px bg-border hidden lg:block" />
+        
+        {/* Theme Toggle */}
+        <button 
+          onClick={toggleTheme} 
+          className="text-content-muted hover:text-content-primary transition-colors p-1"
+          title="Toggle Theme"
+        >
+          {mounted && resolvedTheme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+
+        <div className="h-4 w-px bg-border" />
 
         {/* Notifications */}
         <button className="relative text-content-muted hover:text-content-primary transition-colors p-1">

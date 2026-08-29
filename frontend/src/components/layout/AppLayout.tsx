@@ -6,61 +6,18 @@ import { Topbar } from "./Topbar";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 
-function CustomCursor() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isInteractive, setIsInteractive] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    // Only run on desktop where hover is supported and reduced motion is not preferred
-    const mediaQuery = window.matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)');
-    if (!mediaQuery.matches) return;
-
-    const onMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      setIsVisible(true);
-      
-      const target = e.target as HTMLElement;
-      const isClickable = 
-        target.tagName.toLowerCase() === 'button' ||
-        target.tagName.toLowerCase() === 'a' ||
-        target.tagName.toLowerCase() === 'input' ||
-        target.tagName.toLowerCase() === 'select' ||
-        target.closest('button') ||
-        target.closest('a');
-        
-      setIsInteractive(!!isClickable);
-    };
-
-    const onMouseLeave = () => setIsVisible(false);
-    
-    window.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseleave", onMouseLeave);
-    
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseleave", onMouseLeave);
-    };
-  }, []);
-
-  if (!isVisible) return null;
-
-  return (
-    <div 
-      className={`custom-cursor ${isInteractive ? 'interactive' : ''}`}
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`
-      }}
-    />
-  );
-}
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && pathname !== "/login") {
@@ -80,11 +37,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) {
     if (pathname === "/login") {
       return (
-        <div className="relative min-h-screen">
-          <div className="ambient-layer">
-            <div className="ambient-grid"></div>
-            <div className="ambient-glow"></div>
-          </div>
+        <div className="relative min-h-screen bg-background">
           <div className="relative z-10 min-h-screen">
             {children}
           </div>
@@ -96,11 +49,33 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden relative">
-      <CustomCursor />
-      <div className="ambient-layer">
-        <div className="ambient-grid opacity-30"></div>
-        <div className="ambient-glow opacity-30"></div>
-      </div>
+      {mounted && resolvedTheme === 'dark' ? (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat fixed"
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            style={{ backgroundImage: "url('/bg-inspector.jpg')", mixBlendMode: 'screen' }}
+          ></motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background opacity-90"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-80"></div>
+        </div>
+      ) : mounted ? (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat fixed"
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.12 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            style={{ backgroundImage: "url('/bg-inspector.jpg')", mixBlendMode: 'multiply' }}
+          ></motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background opacity-90"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-60"></div>
+        </div>
+      ) : (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-background"></div>
+      )}
       
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">

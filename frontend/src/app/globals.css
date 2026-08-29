@@ -3,13 +3,59 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: #F1F5F9;
+    --surface: #FFFFFF;
+    --elevated: #F8FAFC;
+    --border: #E2E8F0;
+    --border-hover: #CBD5E1;
+    --content-primary: #0F172A;
+    --content-secondary: #334155;
+    --content-muted: #64748B;
+    --accent: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-muted: rgba(37, 99, 235, 0.08);
+    --status-verification: #059669;
+    --status-warning: #D97706;
+    --status-critical: #DC2626;
+    --status-ai: #6366F1;
+    --status-blockchain: #0284C7;
+  }
+
+  .dark {
+    --background: #060B14;
+    --surface: #0D131F;
+    --elevated: #131B2A;
+    --border: #1E293B;
+    --border-hover: #334155;
+    --content-primary: #F8FAFC;
+    --content-secondary: #94A3B8;
+    --content-muted: #475569;
+    --accent: #38BDF8;
+    --accent-hover: #0EA5E9;
+    --accent-muted: rgba(56, 189, 248, 0.1);
+    --status-verification: #0E956A;
+    --status-warning: #E88D14;
+    --status-critical: #D92E2E;
+    --status-ai: #7B5EE4;
+    --status-blockchain: #0C8CE9;
+  }
+
   body {
-    @apply bg-background text-content-primary antialiased;
+    background-color: var(--background);
+    color: var(--content-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+  }
+  
+  /* Apply display font to all headings for that creative look */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
   }
 }
 
-/* Custom Scrollbar for a premium feel */
+/* Custom Scrollbar for a premium dark feel */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -28,68 +74,17 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Ambient Background Components */
+/* Ambient Background Components - HIDING THESE FOR MINIMALIST LOOK */
 .ambient-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+  display: none !important;
 }
 
 .ambient-grid {
-  position: absolute;
-  inset: 0;
-  background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  display: none !important;
 }
 
 .ambient-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  background: radial-gradient(circle at 50% 0%, rgba(77, 124, 254, 0.05) 0%, transparent 50%);
-}
-
-/* Custom Magnetic Cursor Styles */
-@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  body {
-    cursor: none; /* Hide default cursor if we are showing custom */
-  }
-
-  /* But keep default cursor for interactive elements just in case custom cursor lags */
-  a, button, input, select, textarea {
-    cursor: none; 
-  }
-}
-
-.custom-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 12px;
-  height: 12px;
-  background-color: #F5F7FA;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s cubic-bezier(0.22, 1, 0.36, 1), 
-              height 0.2s cubic-bezier(0.22, 1, 0.36, 1), 
-              background-color 0.2s ease,
-              border 0.2s ease;
-  mix-blend-mode: difference;
-}
-
-.custom-cursor.interactive {
-  width: 32px;
-  height: 32px;
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  mix-blend-mode: normal;
+  display: none !important;
 }
 
 /* Base focus rings */
@@ -101,4 +96,9 @@
 /* Remove default focus outline */
 input:focus, select:focus, textarea:focus, button:focus {
   outline: none;
+}
+
+/* Redefine shadow utility for a soft minimalist feel on cards */
+.shadow-premium {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
 }

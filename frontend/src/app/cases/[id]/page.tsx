@@ -67,7 +67,7 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
           <button className="bg-surface hover:bg-elevated text-content-primary px-4 py-2 rounded text-[10px] font-bold transition-all border border-border flex items-center gap-2 uppercase tracking-widest">
             <TestTube className="w-3.5 h-3.5" /> Add Evidence
           </button>
-          <button className="bg-accent text-white hover:bg-accent-hover px-4 py-2 rounded text-[10px] font-bold transition-all flex items-center gap-2 uppercase tracking-widest shadow-[0_0_15px_rgba(77,124,254,0.3)] hover:shadow-[0_0_20px_rgba(77,124,254,0.5)]">
+          <button className="bg-accent text-white hover:bg-accent-hover px-4 py-2 rounded text-[10px] font-bold transition-all flex items-center gap-2 uppercase tracking-widest shadow-premium hover:shadow-premium">
             <ShieldCheck className="w-3.5 h-3.5" /> Verify Integrity
           </button>
           <button className="bg-surface hover:bg-elevated text-content-primary px-3 py-2 rounded text-[10px] transition-all border border-border flex items-center">

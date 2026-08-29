@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit, Syne } from "next/font/google";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ 
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const syne = Syne({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
-  title: "Government Portal",
-  description: "Official Government Portal",
+  title: "SECURE-OPS | Government Portal",
+  description: "Secure Digital Document Management System for Law Enforcement",
 };
 
 export default function RootLayout({
@@ -16,9 +25,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans`}>
-        <AppLayout>{children}</AppLayout>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${outfit.variable} ${syne.variable} font-sans antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <AppLayout>{children}</AppLayout>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -222,7 +222,7 @@ export default function DocumentUploadPage() {
             <button 
               type="submit" 
               disabled={uploadState !== 'IDLE' || !file} 
-              className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-[0_0_15px_rgba(77,124,254,0.3)] hover:shadow-[0_0_20px_rgba(77,124,254,0.5)] disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center gap-3"
+              className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-premium hover:shadow-premium disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center gap-3"
             >
               {uploadState !== 'IDLE' ? (
                 <><Activity className="w-4 h-4 animate-spin" /> Processing</>

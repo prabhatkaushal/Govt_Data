@@ -1,86 +1,47 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
-const config = {
-  darkMode: ["class"],
+const config: Config = {
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
-      colors: {
-        // Core Palette
-        background: "#07090D",
-        surface: "#0D1118",
-        elevated: "#121821",
-        
-        // Text
-        content: {
-          primary: "#F5F7FA",
-          secondary: "#8D98A8",
-          muted: "#5E6878",
-        },
-        
-        // Borders
-        border: "rgba(255, 255, 255, 0.08)",
-        "border-hover": "rgba(255, 255, 255, 0.15)",
-        
-        // Accents
-        accent: {
-          DEFAULT: "#4D7CFE", // Electric blue
-          hover: "#638DFE",
-          muted: "rgba(77, 124, 254, 0.1)",
-        },
-        
-        // Semantic
-        status: {
-          verification: "#22C55E",
-          warning: "#F59E0B",
-          critical: "#EF4444",
-          ai: "#8B5CF6", // Violet/Indigo
-          blockchain: "#06B6D4", // Cyan
-        }
-      },
-      backgroundImage: {
-        'ambient-grid': 'linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-        'ambient-glow': 'radial-gradient(circle at 50% 0%, rgba(77, 124, 254, 0.05) 0%, transparent 50%)',
-      },
-      backgroundSize: {
-        'ambient-grid': '40px 40px',
-      },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        mono: ['var(--font-mono)', 'monospace'],
+        sans: ['var(--font-sans)', 'sans-serif'],
+        display: ['var(--font-display)', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
-      transitionTimingFunction: {
-        'premium': 'cubic-bezier(0.22, 1, 0.36, 1)',
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-        'slide-up': 'slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+      colors: {
+        background: "var(--background)", 
+        surface: "var(--surface)",
+        elevated: "var(--elevated)",
+        border: "var(--border)",
+        "border-hover": "var(--border-hover)",
+        
+        content: {
+          primary: "var(--content-primary)",
+          secondary: "var(--content-secondary)",
+          muted: "var(--content-muted)",
         },
-        slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        
+        accent: {
+          DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
+          muted: "var(--accent-muted)",
+        },
+        
+        status: {
+          verification: "var(--status-verification)",
+          warning: "var(--status-warning)",
+          critical: "var(--status-critical)",
+          ai: "var(--status-ai)",
+          blockchain: "var(--status-blockchain)"
         }
-      }
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
-
-export default config
+};
+export default config;
