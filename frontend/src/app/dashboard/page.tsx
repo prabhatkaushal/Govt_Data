@@ -9,6 +9,9 @@ import {
   AlertOctagon, Activity, ChevronRight, Lock, Database,
   Hexagon, PenTool, Plus, Upload, Search, ClipboardCheck
 } from "lucide-react";
+import DashboardStats from "@/components/features/dashboard/DashboardStats";
+import RecentActivityFeed from "@/components/features/dashboard/RecentActivityFeed";
+import ActiveCasesTable from "@/components/features/dashboard/ActiveCasesTable";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -86,27 +89,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* KPI Row */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border rounded overflow-hidden">
-        {[
-          { label: "Active Cases", value: stats.casesCount, icon: Briefcase, color: "text-accent" },
-          { label: "Documents", value: stats.documentsCount, icon: FileText, color: "text-content-primary" },
-          { label: "Verified", value: stats.verifiedCount, sub: `${stats.documentsCount > 0 ? Math.round((stats.verifiedCount / stats.documentsCount) * 100) : 0}% integrity`, icon: CheckCircle, color: "text-status-verification" },
-          { label: "Pending Review", value: stats.pendingCount, icon: ClipboardCheck, color: "text-status-warning" },
-          { label: "Evidence Items", value: "—", sub: "Awaiting backend", icon: TestTube, color: "text-content-muted" },
-          { label: "Security Alerts", value: stats.alertsCount.toString().padStart(2, '0'), sub: stats.alertsCount > 0 ? `${stats.alertsCount} require attention` : "All clear", icon: AlertOctagon, color: stats.alertsCount > 0 ? "text-status-critical" : "text-status-verification" },
-        ].map((kpi, idx) => (
-          <div key={idx} className="bg-surface p-5 flex flex-col justify-between min-h-[100px] group hover:bg-elevated transition-colors">
-            <div className="flex items-center justify-between">
-              <kpi.icon className={`w-4 h-4 ${kpi.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
-            </div>
-            <div className="mt-3">
-              <div className={`text-2xl font-bold ${kpi.color} tracking-tight`}>{kpi.value}</div>
-              <div className="text-[10px] text-content-muted tracking-[0.1em] uppercase mt-1">{kpi.label}</div>
-              {kpi.sub && <div className="text-[10px] text-content-muted font-mono mt-0.5">{kpi.sub}</div>}
-            </div>
-          </div>
-        ))}
-      </motion.div>
+      <DashboardStats stats={stats} />
 
       {/* Quick Actions */}
       <motion.div variants={fadeUp} className="flex flex-wrap gap-2">
@@ -132,92 +115,10 @@ export default function DashboardPage() {
         <div className="xl:col-span-8 space-y-8">
           
           {/* Active Investigations */}
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5 text-accent" /> Active Investigations
-              </h2>
-              <Link href="/cases" className="text-[10px] text-content-muted hover:text-accent transition-colors tracking-widest uppercase">
-                View All
-              </Link>
-            </div>
-            <div className="border border-border rounded overflow-hidden bg-surface">
-              {cases.length === 0 ? (
-                <div className="p-8 text-center text-content-muted text-sm">No active cases.</div>
-              ) : (
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-border bg-elevated/30 text-[10px] font-bold text-content-muted tracking-[0.12em] uppercase">
-                      <th className="px-4 py-3 font-normal">Case ID</th>
-                      <th className="px-4 py-3 font-normal">Title</th>
-                      <th className="px-4 py-3 font-normal">Status</th>
-                      <th className="px-4 py-3 font-normal">Classification</th>
-                      <th className="px-4 py-3 font-normal text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/50">
-                    {cases.map((c: any) => (
-                      <tr key={c.id} className="group hover:bg-elevated/40 transition-colors cursor-pointer relative">
-                        <td className="px-4 py-3 text-xs font-mono text-accent font-medium">
-                          <Link href={`/cases/${c.id}`} className="absolute inset-0" aria-label={`View case ${c.case_number}`} />
-                          {c.case_number}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-content-primary">{c.title}</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-[2px] border ${
-                            c.status === 'UNDER_INVESTIGATION' ? 'text-status-warning bg-status-warning/10 border-status-warning/20' :
-                            c.status === 'OPEN' || c.status === 'ACTIVE' ? 'text-status-verification bg-status-verification/10 border-status-verification/20' :
-                            'text-content-muted bg-surface border-border'
-                          }`}>
-                            {c.status?.replace(/_/g, ' ')}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-[10px] font-bold tracking-widest uppercase text-content-muted">
-                          {c.confidentiality_level?.replace(/_/g, ' ')}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <ChevronRight className="w-3.5 h-3.5 text-content-muted opacity-0 group-hover:opacity-100 group-hover:text-accent transition-all inline-block" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </motion.div>
+          <ActiveCasesTable cases={cases} />
 
           {/* Recent Activity */}
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5 text-status-warning" /> Recent Activity
-              </h2>
-            </div>
-            <div className="space-y-1">
-              {recentActivity.length === 0 ? (
-                <div className="py-8 text-center text-content-muted text-sm border border-dashed border-border rounded">No activity recorded.</div>
-              ) : recentActivity.map((event) => (
-                <div key={event.id} className="flex items-start gap-4 px-4 py-3 rounded hover:bg-surface/60 transition-colors group">
-                  <div className="shrink-0 mt-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      event.severity === 'HIGH' ? 'bg-status-critical' : 'bg-status-verification'
-                    }`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-content-primary uppercase tracking-wide">{event.action}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-content-secondary">{event.actor}</span>
-                      <span className="text-[10px] text-content-muted">—</span>
-                      <span className="text-[10px] font-mono text-content-muted">{event.target}</span>
-                    </div>
-                  </div>
-                  <div className="text-[10px] font-mono text-content-muted shrink-0">{event.time}</div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <RecentActivityFeed recentActivity={recentActivity} />
         </div>
 
         {/* Right Column: Security + System Status */}

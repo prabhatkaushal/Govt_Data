@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronRight, FileText, Activity, ShieldAlert, Users, Calendar, Download, Edit } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { CaseDetailHeader } from "@/components/features/cases/CaseDetailHeader";
+import { CaseDetailOverview } from "@/components/features/cases/CaseDetailOverview";
 
 export default function CaseDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState("Overview");
@@ -27,41 +29,12 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
         <span className="text-content-primary">{params.id}</span>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-border pb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-content-primary tracking-tight font-mono">{params.id}</h1>
-            <span className="bg-status-critical/10 text-status-critical px-2.5 py-0.5 rounded text-[10px] font-bold tracking-widest flex items-center gap-1 border border-status-critical/20">
-              <ShieldAlert className="w-3 h-3" /> TOP SECRET
-            </span>
-            <span className="bg-status-verification/10 text-status-verification border border-status-verification/20 px-2.5 py-0.5 rounded text-[10px] font-bold tracking-widest">
-              ACTIVE
-            </span>
-          </div>
-          <p className="text-content-secondary text-lg font-medium tracking-wide">Operation Northern Light</p>
-        </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => alert("Inline Edit Mode Activated (Mock)")}
-            className="bg-surface hover:bg-elevated text-content-primary px-4 py-2 rounded text-[10px] font-bold tracking-widest uppercase transition-colors border border-border flex items-center gap-2"
-          >
-            <Edit className="w-4 h-4" /> Edit
-          </button>
-          <button 
-            onClick={handleGenerateReport}
-            disabled={isGenerating || reportGenerated}
-            className="bg-accent text-white hover:bg-accent-hover px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-all shadow-premium hover:shadow-premium flex items-center gap-2 disabled:opacity-80 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? (
-              <><Activity className="w-4 h-4 animate-spin" /> Generating...</>
-            ) : reportGenerated ? (
-              <>Report Ready ✓</>
-            ) : (
-              <><Download className="w-4 h-4" /> Export Report</>
-            )}
-          </button>
-        </div>
-      </div>
+      <CaseDetailHeader 
+        id={params.id}
+        isGenerating={isGenerating}
+        reportGenerated={reportGenerated}
+        onGenerateReport={handleGenerateReport}
+      />
 
       <div className="border-b border-border overflow-x-auto scrollbar-none relative">
         <nav className="flex space-x-8 min-w-max">
@@ -91,47 +64,7 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
 
       <div className="py-4">
         {activeTab === "Overview" && (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
-            <div className="xl:col-span-8 space-y-12">
-              <div className="space-y-4">
-                <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
-                  <FileText className="w-4 h-4 text-accent" /> Case Summary
-                </h3>
-                <p className="text-content-primary leading-relaxed text-sm tracking-wide bg-surface/30 p-6 rounded border border-border/50">
-                  This investigation centers on a coordinated phishing and credential stuffing campaign targeting government infrastructure. The threat actors have attempted to exfiltrate restricted documents. Initial detection occurred on Oct 12, 2023. Currently gathering telemetry, isolating affected nodes, and interviewing witnesses.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
-                  <Users className="w-4 h-4 text-accent" /> Assigned Personnel
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-4 p-4 bg-surface/30 rounded border border-border/50">
-                    <div className="h-12 w-12 rounded bg-surface border border-border flex items-center justify-center text-content-secondary font-bold text-sm">2601</div>
-                    <div>
-                      <p className="text-content-primary text-sm font-bold tracking-wide">Officer 26010001</p>
-                      <p className="text-[10px] font-mono text-content-muted mt-1 uppercase">Lead Investigator</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="xl:col-span-4 space-y-6">
-              <div className="bg-surface/30 border border-border/50 rounded p-6">
-                 <h3 className="text-[10px] font-bold text-content-primary uppercase tracking-[0.2em] mb-4">Metadata</h3>
-                 <dl className="space-y-4">
-                   <div>
-                     <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Date Opened</dt>
-                     <dd className="text-content-primary font-mono text-sm mt-1">2026-08-12</dd>
-                   </div>
-                   <div>
-                     <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Classification</dt>
-                     <dd className="text-status-critical font-mono text-sm mt-1">TOP SECRET</dd>
-                   </div>
-                 </dl>
-              </div>
-            </div>
-          </div>
+          <CaseDetailOverview />
         )}
       </div>
     </div>
