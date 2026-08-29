@@ -18,41 +18,36 @@ NyayaVault is a centralized, highly secure platform designed for authorized law 
 * **Cybersecurity Dashboard:** Visual monitoring of the system's security score and active alerts.
 
 ## Tech Stack
-* **Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS, shadcn/ui
-* **Backend:** FastAPI, Python, SQLAlchemy, Pydantic, Alembic
-* **Database:** PostgreSQL (or SQLite for local fallback)
-* **Authentication:** JWT (JSON Web Tokens) with short-lived access and long-lived refresh tokens.
-* **Containerization:** Docker & Docker Compose
+* **Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS, framer-motion
+* **Backend:** Django 5, Django REST Framework (DRF)
+* **Database:** SQLite (default for development)
+* **Authentication:** JWT via `djangorestframework-simplejwt`
+* **Containerization:** Docker & Docker Compose (Optional)
 
 ## Installation
 
 ### Prerequisites
-* Docker and Docker Compose
-* Node.js v18+ (if running frontend locally)
+* Node.js v18+ 
+* Python 3.10+
 
 ### Environment Variables
-Copy `.env.example` to `.env` and fill out the placeholders.
-
-### Running with Docker (Recommended)
-```bash
-docker compose up --build
-```
-This will start PostgreSQL, the FastAPI backend on `http://localhost:8000`, and the Next.js frontend on `http://localhost:3000`.
+No strict environment variables are required out-of-the-box for local SQLite development, but you can configure database URLs in `.env` if using PostgreSQL.
 
 ### Running Locally (Without Docker)
 
-#### Backend
+#### Backend (Django)
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate
+# On Windows: venv\Scripts\activate
+# On Mac/Linux: source venv/bin/activate
 pip install -r requirements.txt
-alembic upgrade head
-python seed_data.py
-uvicorn main:app --reload
+python manage.py migrate
+python manage.py seed_data
+python manage.py runserver 0.0.0.0:8000
 ```
 
-#### Frontend
+#### Frontend (Next.js)
 ```bash
 cd frontend
 npm install
