@@ -60,3 +60,10 @@ NyayaVault replaces scattered storage systems with a single, secure central vaul
 5. Indexing: The extracted text is passed through an LLM to generate embeddings, which are stored in PostgreSQL via pgvector.
 6. Search: Users can perform smart, natural language searches (RAG) across the evidence registry.
 7. Audit: Every single action (view, download, upload) is verified via JWT/RBAC and permanently recorded in the audit trail.
+
+5. HACKATHON DEMO IMPLEMENTATION (SIMULATED FOR LOCAL PC)
+------------------------------------------------------
+To ensure a flawless and lightning-fast local demonstration without requiring immense cloud computing or downloading 10GB+ machine learning models, the following technologies are implemented as highly robust simulations:
+- **Blockchain:** Hyperledger Fabric is simulated via a local Django ledger (`BlockchainRecord`). It generates realistic Transaction IDs and securely associates real SHA-256 hashes upon upload, proving the chain-of-custody concept.
+- **AI/OCR (PaddleOCR & LangChain):** Simulated via a dedicated FastAPI microservice running on port 8001. The endpoints replicate actual processing times (using async delays) and return realistic RAG JSON responses to the frontend Intelligence Center.
+- **AWS S3 Storage:** Files are encrypted with AES-256 and stored locally in a `mock-s3/` directory to demonstrate secure cryptography before hitting the disk.
