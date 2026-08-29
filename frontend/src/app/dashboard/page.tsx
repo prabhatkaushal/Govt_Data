@@ -102,17 +102,17 @@ export default function DashboardPage() {
           { label: "View Audit", icon: ClipboardCheck, href: "/audit" },
         ].map(action => (
           <Link key={action.label} href={action.href}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface border border-border rounded text-xs text-content-secondary hover:text-content-primary hover:border-border-hover hover:bg-elevated transition-all"
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-surface border border-border rounded-lg text-[13px] font-medium text-content-secondary hover:text-content-primary hover:border-border-hover hover:bg-elevated hover:shadow-sm transition-all"
           >
-            <action.icon className="w-3.5 h-3.5" />
+            <action.icon className="w-4 h-4" />
             {action.label}
           </Link>
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
         {/* Active Investigations + Recent Activity */}
-        <div className="xl:col-span-8 space-y-8">
+        <div className="xl:col-span-8 space-y-10">
           
           {/* Active Investigations */}
           <ActiveCasesTable cases={cases} />
@@ -125,11 +125,11 @@ export default function DashboardPage() {
         <div className="xl:col-span-4 space-y-8">
           
           {/* Security Status */}
-          <motion.div variants={fadeUp}>
-            <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 mb-4">
-              <ShieldCheck className="w-3.5 h-3.5 text-status-verification" /> System Security
+          <motion.div variants={fadeUp} className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+            <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 mb-6">
+              <ShieldCheck className="w-4 h-4 text-status-verification" /> System Security
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {[
                 { label: "Authentication", status: "Operational", icon: Lock, ok: true },
                 { label: "Document Encryption", status: "Operational", icon: ShieldCheck, ok: true },
@@ -138,11 +138,11 @@ export default function DashboardPage() {
                 { label: "Blockchain Integrity", status: "Pending Integration", icon: Hexagon, ok: false },
               ].map(item => (
                 <div key={item.label} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0 group">
-                  <div className="flex items-center gap-2.5">
-                    <item.icon className="w-3.5 h-3.5 text-content-muted" />
-                    <span className="text-xs text-content-secondary">{item.label}</span>
+                  <div className="flex items-center gap-3">
+                    <item.icon className="w-4 h-4 text-content-muted" />
+                    <span className="text-sm font-medium text-content-secondary">{item.label}</span>
                   </div>
-                  <span className={`text-[10px] font-bold tracking-[0.1em] uppercase ${
+                  <span className={`text-[10px] font-bold tracking-[0.1em] uppercase px-2 py-1 rounded bg-elevated ${
                     item.ok ? 'text-status-verification' : 'text-status-warning'
                   }`}>
                     {item.status}
