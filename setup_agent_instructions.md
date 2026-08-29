@@ -51,3 +51,10 @@ If the user previously encountered errors, here is why they happen on a fresh cl
 1. **Build Errors / Runtime Errors (Next.js)**: If they pulled an old commit from the `kkk` branch, the codebase had severe JSX syntax errors that were recently fixed. Also, `node_modules` is gitignored, so `npm install` must be run.
 2. **Missing Accounts / Login Failed**: The `nyayavault.db` SQLite database is gitignored. A fresh clone has no database. `python manage.py migrate` and `python manage.py seed_data` MUST be run to generate the database schema and populate the initial accounts.
 3. **Backend ModuleNotFound Errors**: The Python `venv` is gitignored. The virtual environment must be recreated and `pip install -r requirements.txt` must be run.
+
+## 4. Production / Full Stack Deployment (Docker)
+For a complete environment (including PostgreSQL, pgvector, Django, Next.js, and the AI microservice), you can use Docker Compose:
+```bash
+docker-compose up --build
+```
+*Note: Ensure Docker Desktop is running before executing this command.*

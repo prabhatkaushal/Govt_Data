@@ -1,13 +1,14 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
+  db:
+    # We use pgvector instead of standard postgres to support AI Semantic Search (RAG)
+    image: ankane/pgvector:latest
     container_name: nyayavault-db
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-nyayavault}
       POSTGRES_USER: ${POSTGRES_USER:-nyayavault_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nyayavault_dev_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nyayavault_secure_password}
     ports:
       - "5432:5432"
     volumes:
@@ -24,9 +25,8 @@ services:
       dockerfile: Dockerfile
     container_name: nyayavault-backend
     command: >
-      sh -c "alembic upgrade head &&
-             python seed_data.py || true &&
-             uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
       - media_data:/app/media
@@ -35,7 +35,7 @@ services:
     env_file:
       - .env
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
 
   frontend:
@@ -50,10 +50,22 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       - backend
 
+  ai_microservice:
+    build:
+      context: ./ai_microservice
+    container_name: nyayavault-ai
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./ai_microservice:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      
 volumes:
   postgres_data:
   media_data:
