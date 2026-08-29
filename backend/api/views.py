@@ -18,6 +18,45 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        validated_data = serializer.validated_data
+        password = validated_data.pop('password', 'gov123')
+        
+        department = validated_data.get('department')
+        if department and department.department_code:
+            try:
+                # e.g., 'CYB-01' -> '01'
+                dd_str = "".join(filter(str.isdigit, department.department_code))
+                if len(dd_str) >= 2:
+                    dd = dd_str[-2:]
+                elif len(dd_str) == 1:
+                    dd = f"0{dd_str}"
+                else:
+                    dd = "00"
+            except Exception:
+                dd = "00"
+        else:
+            dd = "00"
+            
+        prefix = f"26{dd}"
+        
+        users_with_prefix = User.objects.filter(username__startswith=prefix)
+        max_serial = 0
+        for u in users_with_prefix:
+            try:
+                serial = int(u.username[4:])
+                if serial > max_serial:
+                    max_serial = serial
+            except ValueError:
+                pass
+                
+        aaaa = f"{max_serial + 1:04d}"
+        username = f"{prefix}{aaaa}"
+        
+        user = serializer.save(username=username)
+        user.set_password(password)
+        user.save()
+
     @action(detail=False, methods=['get'])
     def me(self, request):
         serializer = self.get_serializer(request.user)

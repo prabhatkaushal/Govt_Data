@@ -18,9 +18,15 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     department = DepartmentSerializer(read_only=True)
+    department_id = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), source='department', write_only=True, required=False, allow_null=True
+    )
+    username = serializers.CharField(read_only=True)
+    password = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'full_name', 'role', 'department', 'employee_id']
+        fields = ['id', 'username', 'password', 'email', 'full_name', 'role', 'department', 'department_id', 'employee_id']
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploader = UserSerializer(source="uploaded_by", read_only=True)

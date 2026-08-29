@@ -34,7 +34,7 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
         className="w-full max-w-[400px] space-y-12 relative z-10"
       >
         <div className="flex flex-col items-center text-center space-y-6">

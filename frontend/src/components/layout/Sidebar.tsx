@@ -166,7 +166,7 @@ export function Sidebar() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] as const }}
                     className="overflow-hidden mt-1"
                   >
                     <div className="space-y-px">
@@ -187,7 +187,7 @@ export function Sidebar() {
                               <motion.div 
                                 layoutId="sidebar-active"
                                 className="absolute left-0 top-[20%] bottom-[20%] w-[2px] bg-accent rounded-r-full"
-                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] as const }}
                               />
                             )}
                             <item.icon className={`w-[15px] h-[15px] shrink-0 transition-all duration-200 ${

@@ -10,14 +10,14 @@ const containerVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { ease: [0.22, 1, 0.36, 1] } },
+  visible: { opacity: 1, y: 0, transition: { ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 export default function EvidencePage() {
