@@ -39,77 +39,45 @@ export function Sidebar() {
       name: "COMMAND",
       items: [
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { name: "Command Center", href: "/dashboard", icon: Target },
       ]
     },
     {
       name: "INVESTIGATIONS",
       items: [
         { name: "Cases", href: "/cases", icon: Briefcase },
-        { name: "Active Investigations", href: "/cases?view=active", icon: FileSearch },
-        { name: "Case Timeline", href: "/cases/timeline", icon: Clock },
-        { name: "Assignments", href: "/cases/assignments", icon: Users },
       ]
     },
     {
       name: "DOCUMENTS",
       items: [
-        { name: "Documents", href: "/documents", icon: FileText },
+        { name: "Documents Vault", href: "/documents", icon: FileText },
         { name: "Upload Document", href: "/documents/upload", icon: Upload },
-        { name: "Categories", href: "/documents/categories", icon: FolderTree },
-        { name: "Versions", href: "/documents/versions", icon: History },
-        { name: "Verification", href: "/security", icon: CheckCircle },
-        { name: "Secure Sharing", href: "/documents/sharing", icon: Share2 },
       ]
     },
     {
       name: "EVIDENCE",
       items: [
         { name: "Evidence Registry", href: "/evidence", icon: TestTube },
-        { name: "Evidence Vault", href: "/evidence/vault", icon: Archive },
-        { name: "Chain of Custody", href: "/evidence/chain", icon: LinkIcon },
-        { name: "Transfers", href: "/evidence/transfers", icon: Replace },
-        { name: "Forensics", href: "/evidence/forensics", icon: Fingerprint },
       ]
     },
     {
       name: "INTELLIGENCE",
       items: [
         { name: "Global Search", href: "/search", icon: Search },
-        { name: "AI Search", href: "/search/ai", icon: Sparkles },
-        { name: "AI Assistant", href: "/search/assistant", icon: Bot },
-        { name: "OCR", href: "/search/ocr", icon: ScanText },
-        { name: "People & Entities", href: "/search/people", icon: UserSearch },
       ]
     },
     {
-      name: "SECURITY",
+      name: "SECURITY & AUDIT",
       items: [
         { name: "Security Center", href: "/security", icon: ShieldCheck },
-        { name: "Integrity Verification", href: "/security/integrity", icon: CheckCircle },
-        { name: "Blockchain Verification", href: "/security/blockchain", icon: Hexagon },
-        { name: "Digital Signatures", href: "/security/signatures", icon: PenTool },
-        { name: "Security Alerts", href: "/security/alerts", icon: AlertOctagon },
-      ]
-    },
-    {
-      name: "AUDIT",
-      items: [
         { name: "Audit Trail", href: "/audit", icon: ListOrdered },
-        { name: "Activity Logs", href: "/audit/activity", icon: Activity },
-        { name: "Access Logs", href: "/audit/access", icon: Lock },
-        { name: "Reports", href: "/audit/reports", icon: BarChart3 },
-        { name: "Compliance", href: "/audit/compliance", icon: ClipboardCheck },
       ]
     },
     {
       name: "ADMIN",
       roles: ["ADMIN", "admin"],
       items: [
-        { name: "Users", href: "/admin", icon: UserCog },
-        { name: "Roles & Permissions", href: "/admin/roles", icon: Key },
-        { name: "Departments", href: "/admin/departments", icon: Building2 },
-        { name: "Settings", href: "/admin/settings", icon: Settings },
+        { name: "Users & Roles", href: "/admin", icon: UserCog },
       ]
     }
   ], []);
