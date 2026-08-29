@@ -134,6 +134,7 @@ export default function DocumentUploadForm({
             <option value="WITNESS_STATEMENT">Witness Statement</option>
             <option value="CHARGE_SHEET">Charge Sheet</option>
             <option value="FORENSIC_REPORT">Forensic Report</option>
+            <option value="EVIDENCE">Evidence</option>
             <option value="OTHER">Other</option>
           </select>
         </div>
@@ -155,7 +156,7 @@ export default function DocumentUploadForm({
         </div>
 
         <div className="space-y-3 md:col-span-2">
-          <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Chain of Custody Remarks</label>
+          <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Description / Remarks (Optional)</label>
           <textarea 
             rows={3}
             value={remarks}

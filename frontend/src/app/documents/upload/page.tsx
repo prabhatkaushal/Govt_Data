@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import DocumentUploadForm from "@/components/features/documents/DocumentUploadForm";
@@ -11,13 +11,22 @@ import SecurityProtocolPanel from "@/components/features/documents/SecurityProto
 
 export default function DocumentUploadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefilledCase = searchParams.get("caseId") || "";
+
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [documentType, setDocumentType] = useState("");
-  const [caseId, setCaseId] = useState("");
+  const [caseId, setCaseId] = useState(prefilledCase);
   const [confidentiality, setConfidentiality] = useState("CONFIDENTIAL");
   const [remarks, setRemarks] = useState("");
+  
+  useEffect(() => {
+    if (prefilledCase) {
+      setCaseId(prefilledCase);
+    }
+  }, [prefilledCase]);
   
   const [uploadState, setUploadState] = useState<'IDLE' | 'UPLOADING' | 'VALIDATING' | 'HASHING' | 'COMPLETE'>('IDLE');
 

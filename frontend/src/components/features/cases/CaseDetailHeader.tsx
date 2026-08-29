@@ -1,4 +1,5 @@
-import { ShieldAlert, Edit, Activity, Download } from "lucide-react";
+import Link from "next/link";
+import { ShieldAlert, Edit, Activity, Download, Upload } from "lucide-react";
 
 interface CaseDetailHeaderProps {
   id: string;
@@ -23,6 +24,9 @@ export function CaseDetailHeader({ id, isGenerating, reportGenerated, onGenerate
         <p className="text-content-secondary text-lg font-medium tracking-wide">Operation Northern Light</p>
       </div>
       <div className="flex gap-3">
+        <Link href={`/documents/upload?caseId=${id}`} className="bg-status-verification/10 text-status-verification hover:bg-status-verification/20 border border-status-verification/30 px-4 py-2 rounded text-[10px] font-bold tracking-widest uppercase transition-colors flex items-center gap-2">
+          <Upload className="w-4 h-4" /> Upload Evidence
+        </Link>
         <button 
           onClick={() => alert("Inline Edit Mode Activated (Mock)")}
           className="bg-surface hover:bg-elevated text-content-primary px-4 py-2 rounded text-[10px] font-bold tracking-widest uppercase transition-colors border border-border flex items-center gap-2"
