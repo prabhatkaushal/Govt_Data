@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import { Search, Filter, Plus, ChevronRight, Briefcase } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Case {
   id: string;
@@ -11,6 +13,8 @@ interface Case {
   status: string;
   confidentiality_level: string;
   created_at: string;
+  updated_at?: string;
+  lead_investigator?: any;
 }
 
 export default function CasesPage() {
@@ -31,88 +35,134 @@ export default function CasesPage() {
     fetchCases();
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { ease: [0.22, 1, 0.36, 1], duration: 0.4 } }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end">
+    <motion.div 
+      className="space-y-8 max-w-[1600px] mx-auto"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Cases</h1>
-          <p className="text-slate-400 mt-1">Manage and monitor active investigations and operations.</p>
+          <h1 className="text-2xl font-bold text-content-primary tracking-wide uppercase flex items-center gap-3">
+            <Briefcase className="w-5 h-5 text-accent" /> Active Cases
+          </h1>
+          <p className="text-content-muted mt-2 text-xs font-mono tracking-widest uppercase">Manage and monitor ongoing investigations</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-          + New Case
+        <button className="bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 px-5 py-2.5 rounded text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-2">
+          <Plus className="w-4 h-4" /> New Case
         </button>
-      </div>
+      </motion.div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-        <div className="p-4 border-b border-slate-800 flex gap-4">
-          <input 
-            type="text" 
-            placeholder="Search cases by ID or title..." 
-            className="flex-1 bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          />
-          <select className="bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Pending</option>
-            <option>Closed</option>
-          </select>
+      <motion.div variants={itemVariants} className="space-y-4">
+        {/* FILTERS */}
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="relative flex-1 min-w-[250px] group">
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-content-muted group-focus-within:text-accent transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Search cases by ID or title..." 
+              className="w-full bg-surface border border-border rounded pl-9 pr-4 py-2 text-sm text-content-primary focus:outline-none focus:border-accent/50 focus:bg-elevated transition-colors"
+            />
+          </div>
+          <div className="flex gap-3">
+            <div className="relative">
+              <Filter className="w-4 h-4 absolute left-3 top-2.5 text-content-muted pointer-events-none" />
+              <select className="bg-surface border border-border rounded pl-9 pr-8 py-2 text-xs font-bold tracking-widest uppercase text-content-secondary focus:outline-none focus:border-accent/50 appearance-none transition-colors">
+                <option>Status: All</option>
+                <option>Active</option>
+                <option>Under Investigation</option>
+                <option>Closed</option>
+              </select>
+            </div>
+            <select className="bg-surface border border-border rounded px-4 py-2 text-xs font-bold tracking-widest uppercase text-content-secondary focus:outline-none focus:border-accent/50 appearance-none transition-colors">
+              <option>Priority: All</option>
+              <option>Critical</option>
+              <option>High</option>
+              <option>Medium</option>
+            </select>
+          </div>
         </div>
 
+        {/* DATA TABLE */}
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-8 text-center text-slate-400">Loading cases...</div>
+            <div className="h-64 flex flex-col items-center justify-center space-y-4">
+              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-content-muted font-mono tracking-[0.2em] text-[10px] uppercase">Retrieving Records</p>
+            </div>
           ) : cases.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">No cases found.</div>
+            <div className="h-64 flex flex-col items-center justify-center border border-dashed border-border rounded">
+              <Briefcase className="w-8 h-8 text-content-muted mb-4 opacity-50" />
+              <p className="text-content-secondary font-medium text-sm">No cases match the current filters.</p>
+            </div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-900/50 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400">
-                  <th className="px-6 py-4 font-medium">Case ID</th>
-                  <th className="px-6 py-4 font-medium">Title</th>
-                  <th className="px-6 py-4 font-medium">Status</th>
-                  <th className="px-6 py-4 font-medium">Classification</th>
-                  <th className="px-6 py-4 font-medium">Date Opened</th>
-                  <th className="px-6 py-4 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {cases.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-800/30 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
-                      <Link href={`/cases/${c.id}`}>{c.case_number}</Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">{c.title}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                        c.status === 'UNDER_INVESTIGATION' ? 'bg-amber-900/30 text-amber-400 border-amber-800' : 
-                        c.status === 'OPEN' ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800' : 
-                        'bg-slate-800 text-slate-400 border-slate-700'
-                      }`}>
-                        {c.status.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
-                        c.confidentiality_level === 'TOP_SECRET' ? 'bg-red-900/50 text-red-400' :
-                        c.confidentiality_level === 'CONFIDENTIAL' ? 'bg-blue-900/50 text-blue-400' :
-                        'bg-slate-800 text-slate-400'
-                      }`}>
-                        {c.confidentiality_level.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{new Date(c.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link href={`/cases/${c.id}`} className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
-                        View Details →
-                      </Link>
-                    </td>
+            <div className="border border-border rounded bg-surface overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border bg-elevated/50 text-[10px] font-bold uppercase tracking-[0.15em] text-content-muted">
+                    <th className="px-6 py-4 font-normal">Case ID</th>
+                    <th className="px-6 py-4 font-normal">Title</th>
+                    <th className="px-6 py-4 font-normal">Status</th>
+                    <th className="px-6 py-4 font-normal">Classification</th>
+                    <th className="px-6 py-4 font-normal">Officer</th>
+                    <th className="px-6 py-4 font-normal text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {cases.map((c) => (
+                    <tr key={c.id} className="group hover:bg-elevated transition-colors cursor-pointer relative">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold font-mono text-accent">
+                        <Link href={`/cases/${c.id}`} className="absolute inset-0" />
+                        {c.case_number}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-content-primary font-medium tracking-wide">
+                        {c.title}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-[2px] text-[9px] font-bold tracking-widest border ${
+                          c.status === 'UNDER_INVESTIGATION' ? 'bg-status-warning/10 text-status-warning border-status-warning/20' : 
+                          c.status === 'OPEN' || c.status === 'ACTIVE' ? 'bg-status-verification/10 text-status-verification border-status-verification/20' : 
+                          'bg-surface text-content-muted border-border'
+                        }`}>
+                          {c.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center text-[10px] font-bold tracking-[0.2em] uppercase ${
+                          c.confidentiality_level === 'TOP_SECRET' ? 'text-status-critical' :
+                          c.confidentiality_level === 'CONFIDENTIAL' ? 'text-accent' :
+                          'text-content-muted'
+                        }`}>
+                          {c.confidentiality_level.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-content-secondary tracking-wide">
+                        {c.lead_investigator?.username || 'Unassigned'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="inline-flex items-center justify-center p-1.5 rounded text-content-muted group-hover:text-accent group-hover:bg-accent/10 transition-all">
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -2,106 +2,162 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { 
+  Upload, ShieldCheck, Share2, PenTool, MoreHorizontal,
+  FileText, TestTube, Clock, Users, Sparkles, ListOrdered
+} from "lucide-react";
 
 export default function CaseDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState("Overview");
 
-  const tabs = ["Overview", "Documents", "Evidence", "Timeline"];
+  const tabs = [
+    { name: "Overview", icon: ShieldCheck },
+    { name: "Documents", icon: FileText },
+    { name: "Evidence", icon: TestTube },
+    { name: "Timeline", icon: Clock },
+    { name: "People", icon: Users },
+    { name: "AI Insights", icon: Sparkles },
+    { name: "Audit", icon: ListOrdered }
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { ease: [0.22, 1, 0.36, 1], duration: 0.4 } }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
-        <Link href="/cases" className="hover:text-white transition-colors">Cases</Link>
+    <motion.div 
+      className="space-y-10 max-w-[1600px] mx-auto"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={itemVariants} className="flex items-center gap-3 text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase mb-[-1rem]">
+        <Link href="/dashboard" className="hover:text-content-primary transition-colors">Command</Link>
         <span>/</span>
-        <span className="text-slate-200">{params.id}</span>
-      </div>
+        <Link href="/cases" className="hover:text-content-primary transition-colors">Cases</Link>
+        <span>/</span>
+        <span className="text-content-primary">CASE-{params.id}</span>
+      </motion.div>
 
-      <div className="flex justify-between items-start">
+      <motion.div variants={itemVariants} className="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-6 border-b border-border pb-8">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-white tracking-tight">{params.id}</h1>
-            <span className="bg-red-900/50 text-red-400 px-2 py-0.5 rounded text-xs font-bold border border-red-800">
-              TOP SECRET
+          <div className="flex items-center gap-4">
+            <h1 className="text-4xl font-bold text-content-primary tracking-tight uppercase">CASE-{params.id}</h1>
+            <span className="bg-status-critical/10 text-status-critical px-2.5 py-1 rounded-[2px] text-[9px] font-bold border border-status-critical/20 tracking-widest uppercase">
+              HIGH PRIORITY
             </span>
-            <span className="bg-emerald-900/30 text-emerald-400 px-2.5 py-0.5 rounded-full text-xs font-medium border border-emerald-800">
-              Active
+            <span className="bg-status-verification/10 text-status-verification px-2.5 py-1 rounded-[2px] text-[9px] font-bold border border-status-verification/20 tracking-widest uppercase">
+              ACTIVE
             </span>
           </div>
-          <p className="text-slate-400 mt-2 text-lg">Operation Northern Light</p>
+          <p className="text-content-secondary mt-3 text-sm tracking-wide">Cyber Crime Investigation • Organized Fraud Syndicate</p>
         </div>
-        <div className="flex gap-2">
-          <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors border border-slate-700">
-            Edit Case
+        
+        <div className="flex flex-wrap gap-2">
+          <button className="bg-surface hover:bg-elevated text-content-primary px-4 py-2 rounded text-[10px] font-bold transition-all border border-border flex items-center gap-2 uppercase tracking-widest">
+            <Upload className="w-3.5 h-3.5" /> Upload Doc
           </button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-            Generate Report
+          <button className="bg-surface hover:bg-elevated text-content-primary px-4 py-2 rounded text-[10px] font-bold transition-all border border-border flex items-center gap-2 uppercase tracking-widest">
+            <TestTube className="w-3.5 h-3.5" /> Add Evidence
+          </button>
+          <button className="bg-accent text-white hover:bg-accent-hover px-4 py-2 rounded text-[10px] font-bold transition-all flex items-center gap-2 uppercase tracking-widest shadow-[0_0_15px_rgba(77,124,254,0.3)] hover:shadow-[0_0_20px_rgba(77,124,254,0.5)]">
+            <ShieldCheck className="w-3.5 h-3.5" /> Verify Integrity
+          </button>
+          <button className="bg-surface hover:bg-elevated text-content-primary px-3 py-2 rounded text-[10px] transition-all border border-border flex items-center">
+            <MoreHorizontal className="w-4 h-4" />
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="border-b border-slate-800">
-        <nav className="flex space-x-8">
+      <motion.div variants={itemVariants} className="border-b border-border overflow-x-auto scrollbar-none relative">
+        <nav className="flex space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab
-                  ? "border-blue-500 text-blue-400"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700"
+              key={tab.name}
+              onClick={() => setActiveTab(tab.name)}
+              className={`relative py-4 px-1 text-[10px] font-bold tracking-[0.2em] uppercase transition-colors flex items-center gap-2 group ${
+                activeTab === tab.name
+                  ? "text-accent"
+                  : "text-content-muted hover:text-content-secondary"
               }`}
             >
-              {tab}
+              <tab.icon className={`w-4 h-4 transition-transform duration-200 ${activeTab === tab.name ? 'scale-110' : 'group-hover:scale-110'}`} />
+              {tab.name}
+              {activeTab === tab.name && (
+                <motion.div 
+                  layoutId="active-tab-indicator"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent"
+                  initial={false}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                />
+              )}
             </button>
           ))}
         </nav>
-      </div>
+      </motion.div>
 
-      <div className="py-4">
+      <motion.div variants={itemVariants} className="py-4">
         {activeTab === "Overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Case Summary</h3>
-                <p className="text-slate-300 leading-relaxed text-sm">
-                  Operation Northern Light focuses on the investigation of unauthorized access attempts originating from advanced persistent threat (APT) actors targeting critical infrastructure sub-networks. Initial detection occurred on Oct 12, 2023. Currently gathering telemetry and isolating affected nodes.
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+            <div className="xl:col-span-8 space-y-12">
+              <div className="space-y-4">
+                <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
+                  <ShieldCheck className="w-4 h-4 text-accent" /> Case Summary
+                </h3>
+                <p className="text-content-primary leading-relaxed text-sm tracking-wide bg-surface/30 p-6 rounded border border-border/50">
+                  This investigation centers on a coordinated phishing and credential stuffing campaign targeting government infrastructure. The threat actors have attempted to exfiltrate restricted documents. Initial detection occurred on Oct 12, 2023. Currently gathering telemetry, isolating affected nodes, and interviewing witnesses.
                 </p>
               </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Personnel</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-blue-900 flex items-center justify-center text-blue-400 font-bold text-xs">SA</div>
-                      <span className="text-slate-200">Special Agent Smith</span>
+              
+              <div className="space-y-4">
+                <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
+                  <Users className="w-4 h-4 text-accent" /> Assigned Personnel
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-4 p-4 bg-surface/30 rounded border border-border/50 group hover:border-border transition-colors cursor-pointer">
+                    <div className="h-12 w-12 rounded bg-surface border border-border flex items-center justify-center text-content-secondary font-bold text-sm group-hover:border-accent transition-colors">2601</div>
+                    <div>
+                      <p className="text-content-primary text-sm font-bold tracking-wide">Officer 26010001</p>
+                      <p className="text-[10px] text-content-muted font-mono tracking-widest mt-1">LEAD INVESTIGATOR</p>
                     </div>
-                    <span className="text-slate-500">Lead Investigator</span>
-                  </li>
-                  <li className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-purple-900 flex items-center justify-center text-purple-400 font-bold text-xs">JD</div>
-                      <span className="text-slate-200">Jane Doe</span>
+                  </div>
+                  <div className="flex items-center gap-4 p-4 bg-surface/30 rounded border border-border/50 group hover:border-border transition-colors cursor-pointer">
+                    <div className="h-12 w-12 rounded bg-surface border border-border flex items-center justify-center text-content-secondary font-bold text-sm group-hover:border-accent transition-colors">2602</div>
+                    <div>
+                      <p className="text-content-primary text-sm font-bold tracking-wide">Officer 26020002</p>
+                      <p className="text-[10px] text-content-muted font-mono tracking-widest mt-1">LEGAL ADVISOR</p>
                     </div>
-                    <span className="text-slate-500">Cyber Analyst</span>
-                  </li>
-                </ul>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="space-y-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Metadata</h3>
-                <dl className="space-y-4 text-sm">
-                  <div>
-                    <dt className="text-slate-500 font-medium">Opened Date</dt>
-                    <dd className="text-slate-200 mt-1">October 12, 2023</dd>
+            
+            <div className="xl:col-span-4 space-y-12">
+              <div className="space-y-4">
+                <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase border-b border-border pb-2">Metadata</h3>
+                <dl className="space-y-4">
+                  <div className="flex justify-between items-end border-b border-border/30 pb-3">
+                    <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Opened Date</dt>
+                    <dd className="text-content-primary font-mono text-sm">2026-08-12</dd>
                   </div>
-                  <div>
-                    <dt className="text-slate-500 font-medium">Primary Agency</dt>
-                    <dd className="text-slate-200 mt-1">CISA</dd>
+                  <div className="flex justify-between items-end border-b border-border/30 pb-3">
+                    <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Department</dt>
+                    <dd className="text-content-primary text-sm tracking-wide">Cyber Forensics</dd>
                   </div>
-                  <div>
-                    <dt className="text-slate-500 font-medium">Reference IDs</dt>
-                    <dd className="text-slate-200 mt-1 font-mono text-xs">REF-2023-A91B</dd>
+                  <div className="flex justify-between items-end border-b border-border/30 pb-3">
+                    <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Reference IDs</dt>
+                    <dd className="text-accent font-mono text-sm">CYB-2026-A91B</dd>
+                  </div>
+                  <div className="flex justify-between items-end pb-3">
+                    <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Clearance Req</dt>
+                    <dd className="text-status-critical font-bold text-[10px] tracking-widest bg-status-critical/10 px-2 py-1 rounded">LEVEL 3</dd>
                   </div>
                 </dl>
               </div>
@@ -110,28 +166,35 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
         )}
 
         {activeTab === "Documents" && (
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center py-12">
-            <span className="text-4xl">📄</span>
-            <h3 className="text-lg font-medium text-white mt-4">No documents yet</h3>
-            <p className="text-slate-400 text-sm mt-1 mb-4">Upload documents related to this case to track them securely.</p>
-            <Link href="/documents/upload" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-block">
-              Upload Document
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-32 border border-dashed border-border rounded bg-surface/10"
+          >
+            <FileText className="w-10 h-10 text-content-muted mb-6 opacity-50" />
+            <h3 className="text-sm font-bold text-content-secondary tracking-wide uppercase">No documents linked</h3>
+            <Link href="/documents/upload" className="mt-6 text-accent hover:text-accent-hover text-[10px] font-bold uppercase tracking-widest border-b border-accent/30 hover:border-accent pb-1 transition-all">
+              Upload Document →
             </Link>
-          </div>
+          </motion.div>
         )}
         
-        {activeTab === "Evidence" && (
-           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center py-12 text-slate-400">
-             Evidence module tracking loaded. No items to display.
-           </div>
+        {["Evidence", "Timeline", "People", "AI Insights", "Audit"].includes(activeTab) && (
+           <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="flex flex-col items-center justify-center py-32 border border-dashed border-border rounded bg-surface/10"
+           >
+             {activeTab === "Evidence" && <TestTube className="w-10 h-10 text-content-muted mb-6 opacity-50" />}
+             {activeTab === "Timeline" && <Clock className="w-10 h-10 text-content-muted mb-6 opacity-50" />}
+             {activeTab === "People" && <Users className="w-10 h-10 text-content-muted mb-6 opacity-50" />}
+             {activeTab === "AI Insights" && <Sparkles className="w-10 h-10 text-status-ai mb-6 opacity-50" />}
+             {activeTab === "Audit" && <ListOrdered className="w-10 h-10 text-content-muted mb-6 opacity-50" />}
+             <h3 className="text-sm font-bold text-content-secondary tracking-wide uppercase">{activeTab} MODULE LOADED</h3>
+             <p className="text-[10px] text-content-muted tracking-widest uppercase mt-4">NO RECORDS FOUND IN VAULT</p>
+           </motion.div>
         )}
-
-        {activeTab === "Timeline" && (
-           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center py-12 text-slate-400">
-             Timeline module loaded. No events recorded.
-           </div>
-        )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

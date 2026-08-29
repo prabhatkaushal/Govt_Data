@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
-
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { 
+  Upload, FileText, ShieldCheck, Lock, 
+  Activity, CheckCircle, File, Info
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function DocumentUploadPage() {
   const [isDragging, setIsDragging] = useState(false);
@@ -12,16 +16,22 @@ export default function DocumentUploadPage() {
   const [title, setTitle] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [caseId, setCaseId] = useState("");
-  const [confidentiality, setConfidentiality] = useState("unclassified");
+  const [confidentiality, setConfidentiality] = useState("CONFIDENTIAL");
   const [remarks, setRemarks] = useState("");
-  const [loading, setLoading] = useState(false);
+  
+  const [uploadState, setUploadState] = useState<'IDLE' | 'UPLOADING' | 'VALIDATING' | 'HASHING' | 'COMPLETE'>('IDLE');
+  
   const router = useRouter();
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return alert("Please select a file");
 
-    setLoading(true);
+    setUploadState('UPLOADING');
+    
+    setTimeout(() => setUploadState('VALIDATING'), 1000);
+    setTimeout(() => setUploadState('HASHING'), 2500);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
@@ -34,137 +44,252 @@ export default function DocumentUploadPage() {
       await api.post("/documents/", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      router.push("/documents");
+      setTimeout(() => {
+        setUploadState('COMPLETE');
+        setTimeout(() => router.push("/documents"), 1000);
+      }, 4000); 
     } catch (err) {
       console.error("Upload failed", err);
       alert("Failed to upload document");
-    } finally {
-      setLoading(false);
+      setUploadState('IDLE');
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { ease: [0.22, 1, 0.36, 1], duration: 0.4 } }
+  };
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
-        <Link href="/documents" className="hover:text-white transition-colors">Documents</Link>
+    <motion.div 
+      className="space-y-8 max-w-[1200px] mx-auto"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={itemVariants} className="flex items-center gap-3 text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase mb-[-1rem]">
+        <Link href="/documents" className="hover:text-content-primary transition-colors">Documents</Link>
         <span>/</span>
-        <span className="text-slate-200">Upload</span>
-      </div>
+        <span className="text-content-primary">Upload</span>
+      </motion.div>
 
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Upload Document</h1>
-        <p className="text-slate-400 mt-1">Submit new evidence or documentation for secure processing and hashing.</p>
-      </div>
-
-      <form onSubmit={handleUpload} className="bg-slate-900 border border-slate-800 rounded-lg p-8 space-y-8 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Document Title</label>
-            <input 
-              type="text" 
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              placeholder="e.g. Server Audit Log"
-              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Document Type</label>
-            <select 
-              value={documentType}
-              onChange={(e) => setDocumentType(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-              <option value="">Select type...</option>
-              <option value="log">Log File</option>
-              <option value="report">Report (PDF)</option>
-              <option value="media">Media / Video</option>
-              <option value="transcript">Transcript</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Associated Case (Optional)</label>
-            <select 
-              value={caseId}
-              onChange={(e) => setCaseId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-              <option value="">Select a case...</option>
-              <option value="1">CASE-0092: Operation Northern Light</option>
-              <option value="2">CASE-0091: Cybercom Audit Q3</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Confidentiality Level</label>
-            <select 
-              value={confidentiality}
-              onChange={(e) => setConfidentiality(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-              <option value="unclassified">Unclassified</option>
-              <option value="confidential">Confidential</option>
-              <option value="secret">Secret</option>
-              <option value="top_secret">Top Secret</option>
-            </select>
-          </div>
+      <motion.div variants={itemVariants} className="flex items-start gap-4 pb-6 border-b border-border">
+        <div className="w-12 h-12 rounded bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+          <Upload className="w-5 h-5" />
         </div>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary tracking-wide uppercase">Secure Document Ingestion</h1>
+          <p className="text-content-muted mt-2 text-xs font-mono tracking-widest uppercase">All files are cryptographically hashed and anchored.</p>
+        </div>
+      </motion.div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-300">File Upload</label>
-          <div 
-            className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-6 py-10 transition-colors ${
-              isDragging ? "border-blue-500 bg-blue-900/20" : "border-slate-700 bg-slate-950/50"
-            }`}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                setFile(e.dataTransfer.files[0]);
-              }
-            }}
-          >
-            <div className="text-center">
-              <span className="mx-auto flex h-12 w-12 items-center justify-center text-4xl mb-4">
-                {file ? "📄" : "📥"}
-              </span>
-              <div className="mt-4 flex text-sm leading-6 text-slate-400 justify-center">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer rounded-md font-semibold text-blue-500 focus-within:outline-none hover:text-blue-400"
-                >
-                  <span>Upload a file</span>
-                  <input id="file-upload" name="file-upload" type="file" required className="sr-only" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                </label>
-                <p className="pl-1">or drag and drop</p>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+        {/* FORM */}
+        <motion.form variants={itemVariants} onSubmit={handleUpload} className="xl:col-span-2 space-y-8">
+            
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+              <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Document File</label>
+              <span className="text-[10px] text-content-muted font-mono tracking-widest uppercase">MAX 50MB</span>
+            </div>
+            
+            <div 
+              className={`relative flex flex-col items-center justify-center rounded border-2 border-dashed px-6 py-16 transition-all duration-300 ${
+                isDragging ? "border-accent bg-accent/5" : 
+                file ? "border-status-verification/50 bg-status-verification/5" : "border-border bg-surface/30 hover:bg-surface/50 hover:border-border-hover"
+              }`}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                  setFile(e.dataTransfer.files[0]);
+                }
+              }}
+            >
+              <div className="text-center">
+                {file ? (
+                  <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 bg-status-verification/10 text-status-verification rounded-full flex items-center justify-center border border-status-verification/20">
+                      <File className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-content-primary font-bold tracking-wide">{file.name}</p>
+                      <p className="text-[10px] font-mono text-content-muted mt-2 uppercase">{(file.size / 1024 / 1024).toFixed(2)} MB • {file.type || 'UNKNOWN'}</p>
+                    </div>
+                    <button type="button" onClick={() => setFile(null)} className="text-[10px] text-status-critical hover:text-red-300 mt-4 font-bold uppercase tracking-widest border-b border-transparent hover:border-status-critical transition-all">
+                      Remove File
+                    </button>
+                  </motion.div>
+                ) : (
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 bg-background border border-border text-content-muted rounded-full flex items-center justify-center">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div className="mt-2 flex text-sm text-content-muted justify-center items-center gap-2">
+                      <label className="relative cursor-pointer rounded font-bold text-accent hover:text-accent-hover uppercase tracking-widest text-[10px] bg-accent/10 px-4 py-2 border border-accent/20 transition-colors">
+                        <span>Browse Files</span>
+                        <input type="file" required className="sr-only" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                      </label>
+                      <p className="text-xs font-medium tracking-wide">or drag and drop here</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-xs leading-5 text-slate-500 mt-2">
-                {file ? `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)` : "Any file up to 50MB"}
-              </p>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-300">Remarks / Chain of Custody Note</label>
-          <textarea 
-            rows={4}
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-            placeholder="Provide any additional context or remarks about this document's acquisition..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          ></textarea>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+            <div className="space-y-3 md:col-span-2">
+              <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Document Title</label>
+              <input 
+                type="text" 
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                placeholder="e.g. Witness Statement - John Doe"
+                className="w-full bg-surface border border-border rounded px-4 py-3 text-sm text-content-primary placeholder-content-muted focus:border-accent/50 focus:bg-elevated transition-colors"
+              />
+            </div>
 
-        <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
-          <Link href="/documents" className="px-6 py-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white transition-colors">
-            Cancel
-          </Link>
-          <button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-md text-sm font-medium transition-colors shadow-sm disabled:opacity-50">
-            {loading ? "Uploading..." : "Secure Upload & Hash"}
-          </button>
-        </div>
-      </form>
-    </div>
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Case Link (Optional)</label>
+              <input 
+                type="text" 
+                value={caseId}
+                onChange={(e) => setCaseId(e.target.value)}
+                placeholder="e.g. CASE-2026-0142"
+                className="w-full bg-surface border border-border rounded px-4 py-3 text-sm text-content-primary placeholder-content-muted focus:border-accent/50 focus:bg-elevated transition-colors font-mono"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Document Type</label>
+              <select 
+                value={documentType}
+                onChange={(e) => setDocumentType(e.target.value)}
+                required
+                className="w-full bg-surface border border-border rounded px-4 py-3 text-sm text-content-primary focus:border-accent/50 focus:bg-elevated transition-colors appearance-none"
+              >
+                <option value="">Select type...</option>
+                <option value="FIR">FIR (First Information Report)</option>
+                <option value="POLICE_REPORT">Police Report</option>
+                <option value="WITNESS_STATEMENT">Witness Statement</option>
+                <option value="CHARGE_SHEET">Charge Sheet</option>
+                <option value="FORENSIC_REPORT">Forensic Report</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <div className="space-y-3 md:col-span-2">
+              <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Confidentiality Classification</label>
+              <div className="grid grid-cols-3 gap-4">
+                {['UNCLASSIFIED', 'CONFIDENTIAL', 'TOP_SECRET'].map(level => (
+                  <label key={level} className={`flex items-center justify-center gap-3 p-4 rounded border cursor-pointer transition-colors ${
+                    confidentiality === level ? 'bg-surface border-content-secondary' : 'bg-transparent border-border hover:border-content-muted'
+                  }`}>
+                    <input type="radio" name="confidentiality" value={level} checked={confidentiality === level} onChange={() => setConfidentiality(level)} className="sr-only" />
+                    <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+                      level === 'TOP_SECRET' ? 'text-status-critical' : level === 'CONFIDENTIAL' ? 'text-accent' : 'text-content-muted'
+                    }`}>{level.replace('_', ' ')}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-4">
+            <label className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase">Chain of Custody Remarks</label>
+            <textarea 
+              rows={3}
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Optional notes regarding origin or context..."
+              className="w-full bg-surface border border-border rounded px-4 py-3 text-sm text-content-primary placeholder-content-muted focus:border-accent/50 focus:bg-elevated transition-colors resize-none"
+            ></textarea>
+          </div>
+
+          <div className="flex justify-end gap-4 pt-8 border-t border-border">
+            <Link href="/documents" className="px-6 py-3 rounded text-[10px] font-bold text-content-muted hover:text-content-primary hover:bg-surface transition-colors uppercase tracking-widest">
+              Cancel
+            </Link>
+            <button 
+              type="submit" 
+              disabled={uploadState !== 'IDLE' || !file} 
+              className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-[0_0_15px_rgba(77,124,254,0.3)] hover:shadow-[0_0_20px_rgba(77,124,254,0.5)] disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center gap-3"
+            >
+              {uploadState !== 'IDLE' ? (
+                <><Activity className="w-4 h-4 animate-spin" /> Processing</>
+              ) : (
+                <><ShieldCheck className="w-4 h-4" /> Initialize Upload</>
+              )}
+            </button>
+          </div>
+        </motion.form>
+
+        {/* SIDEBAR INFOPANEL */}
+        <motion.div variants={itemVariants} className="space-y-6">
+          <div className="bg-surface/30 border border-border/50 rounded p-6">
+            <h3 className="text-[10px] font-bold text-content-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+              <Info className="w-3.5 h-3.5 text-accent" /> Security Protocol
+            </h3>
+            <ul className="space-y-5">
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-3.5 h-3.5 text-status-verification shrink-0 mt-0.5" />
+                <span className="text-xs text-content-secondary leading-relaxed">All uploads are cryptographically hashed (SHA-256) upon receipt.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-3.5 h-3.5 text-status-verification shrink-0 mt-0.5" />
+                <span className="text-xs text-content-secondary leading-relaxed">Actions are permanently anchored in the immutable audit trail.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Lock className="w-3.5 h-3.5 text-status-warning shrink-0 mt-0.5" />
+                <span className="text-xs text-content-secondary leading-relaxed">Top Secret documents trigger immediate supervisor alerts.</span>
+              </li>
+            </ul>
+          </div>
+
+          {uploadState !== 'IDLE' && (
+            <div className="bg-surface/30 border border-border/50 rounded p-6">
+              <h3 className="text-[10px] font-bold text-content-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <Activity className="w-3.5 h-3.5 text-accent" /> Processing Pipeline
+              </h3>
+              <div className="space-y-5">
+                <div className="flex items-center gap-4">
+                  <div className={`w-1.5 h-1.5 rounded-full ${uploadState === 'UPLOADING' ? 'bg-accent animate-ping' : 'bg-status-verification'}`} />
+                  <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${uploadState === 'UPLOADING' ? 'text-accent' : 'text-status-verification'}`}>
+                    1. SECURE TRANSFER
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 opacity-50">
+                  <div className={`w-1.5 h-1.5 rounded-full ${uploadState === 'VALIDATING' ? 'bg-accent animate-ping' : uploadState === 'HASHING' || uploadState === 'COMPLETE' ? 'bg-status-verification' : 'bg-content-muted'}`} />
+                  <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${uploadState === 'VALIDATING' ? 'text-accent opacity-100' : uploadState === 'HASHING' || uploadState === 'COMPLETE' ? 'text-status-verification opacity-100' : 'text-content-muted'}`}>
+                    2. FILE VALIDATION
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 opacity-50">
+                  <div className={`w-1.5 h-1.5 rounded-full ${uploadState === 'HASHING' ? 'bg-accent animate-ping' : uploadState === 'COMPLETE' ? 'bg-status-verification' : 'bg-content-muted'}`} />
+                  <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${uploadState === 'HASHING' ? 'text-accent opacity-100' : uploadState === 'COMPLETE' ? 'text-status-verification opacity-100' : 'text-content-muted'}`}>
+                    3. GENERATING HASH
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 opacity-50">
+                  <div className={`w-1.5 h-1.5 rounded-full ${uploadState === 'COMPLETE' ? 'bg-status-verification' : 'bg-content-muted'}`} />
+                  <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${uploadState === 'COMPLETE' ? 'text-status-verification opacity-100' : 'text-content-muted'}`}>
+                    4. INDEXED TO VAULT
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
