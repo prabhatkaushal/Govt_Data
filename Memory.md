@@ -1,70 +1,91 @@
 # PROJECT MEMORY
 
 ## Current Status
-The project successfully completed a major migration of the backend from FastAPI to Django (and Django REST Framework). The frontend remains Next.js 14 utilizing a deep-navy cybersecurity design language. Core data models have been translated to Django ORM.
+The project has a solid foundational backend built in Django and a Next.js frontend structure. The core backend data models and REST APIs for authentication, case management, and document uploading (with local storage and SHA-256 hashing) are completely implemented. 
 
 ## Current Architecture
-Next.js (React) Frontend connecting via Axios to a Django REST API backend. SQLite is currently being used for local dev persistence.
+- **Backend:** Django 5.x, Django REST Framework, Simple JWT.
+- **Database:** SQLite (default fallback) / PostgreSQL.
+- **Frontend:** Next.js 14, React 18, Tailwind CSS.
+- **Storage:** Local file system (`/media/`).
 
 ## Implemented Features
-- Django Models (`User`, `Case`, `Document`, `EvidenceChain`, `AuditLog`, `BlockchainRecord`, `DigitalSignature`).
-- Next.js UI structure (Login, Dashboard, Cases, Documents).
-- UI Design System applied (Shield logo, gradients, deep navy sidebars).
+- User Authentication (JWT)
+- Role-Based Access Control (Roles: Admin, Investigating Officer, etc.)
+- Case Management CRUD
+- Document Upload & Local Storage
+- SHA-256 Hashing on Upload
+- Document Versioning (Database records)
+- Chain of Custody logging (`EvidenceChain`)
+- System Audit Logs (`AuditLog`)
+- Mock Digital Signatures (`DigitalSignature` table and `/sign` endpoint)
+- Simulated Blockchain Anchoring (`BlockchainRecord` table)
 
 ## In Progress
-- Connecting the Next.js frontend upload forms to the Django DRF endpoints.
-- End-to-end authentication flow (JWT).
+- Connecting the Next.js frontend views to all the implemented Django REST APIs.
 
 ## Planned
-- Real Hyperledger Fabric blockchain anchoring.
-- AI / OCR integrations.
-- Comprehensive Unit Testing.
+- Secure Document Preview in the UI.
+- Access Request workflow integration.
+- True AI/OCR processing and semantic search.
+- Transitioning simulated blockchain to a real ledger (if required).
+- Production deployment configuration (S3 integration for media).
 
 ## Important Files
-- `backend/api/models.py`: The single source of truth for the database schema, including versioning and chain-of-custody.
-- `frontend/src/components/layout/Sidebar.tsx`: The primary navigation shell.
-- `PROJECT_OVERVIEW.md`: Master documentation for PPT and judging reference.
+- `backend/api/models.py`: Contains the absolute source of truth for the database schema (User, Case, Document, EvidenceChain, etc.).
+- `backend/api/views.py`: Contains the DRF ViewSets governing business logic, particularly the `DocumentViewSet.create()` which handles file saving, hashing, and auditing simultaneously.
+- `backend/core/settings.py`: Django configuration, database routing, JWT settings.
 
 ## Database State
-Using SQLite via Django settings. Models are fully migrated locally.
+Stable. Uses Django ORM. Key tables mapped:
+- `api_user`
+- `api_case`
+- `api_document`
+- `api_evidencechain`
+- `api_auditlog`
 
 ## API State
-DRF basic setup exists in `api/views.py`.
+Fully functional REST API available under `/` (e.g., `/cases/`, `/documents/`). Authentication under `/auth/login/`.
 
 ## Authentication State
-Django built-in `AbstractUser`. Next.js uses a dummy Context that needs to be wired to Django token endpoints.
+Uses `djangorestframework-simplejwt`. Tokens are issued via `/auth/login/` and must be passed as Bearer tokens.
 
 ## Security State
-Django defaults (CSRF, XSS protection). Passwords hashed using PBKDF2.
+Passwords are hashed. Files are hashed with SHA-256. API routes are protected by DRF's `IsAuthenticated`. Files are stored securely on the local disk.
 
 ## Blockchain State
-Mocked via `BlockchainRecord` local table.
+Simulated. A database table (`BlockchainRecord`) mimics an immutable ledger by storing document hashes and transaction IDs.
 
 ## AI State
-Not implemented.
+**NOT CURRENTLY IMPLEMENTED.** (Planned for future phases).
 
 ## Search State
-Basic ORM filtering.
+Basic database ORM querying available. Semantic/Full-text search is not implemented yet.
 
 ## Evidence State
-Implemented via `EvidenceChain` model schema.
+Fully implemented via the `EvidenceChain` model, which acts as an append-only log for document interactions.
 
 ## Audit State
-Implemented via `AuditLog` model schema.
+Implemented. General actions can be logged to `AuditLog`, specific file actions to `EvidenceChain`.
 
 ## Known Issues
-- The frontend Next.js forms (like document upload) are currently mocked and not successfully persisting multipart data to the new Django backend yet.
+- `README.md` and old documentation incorrectly stated the backend was FastAPI. It has been verified to be Django. 
+- Frontend UI is not yet fully wired to all the backend endpoints.
 
 ## Decisions Made
-- Transitioned backend from FastAPI to Django for more robust ORM and built-in administrative features.
-- Documents are stored off-chain; only integrity-related hashes are anchored.
+- **Backend Framework:** Django was selected (and implemented) over FastAPI for robust ORM and built-in auth features.
+- **Blockchain:** Mocked in a relational table for prototype purposes.
+- **Storage:** Local filesystem is used for immediate simplicity, with plans to abstract to S3.
 
 ## Do Not Change
-- The dual-sidebar cybersecurity design aesthetic in the frontend.
-- The append-only `DocumentVersion` philosophy (never delete/overwrite files).
+- Do not migrate the backend away from Django.
+- Do not remove the SHA-256 hashing step in the document upload process.
+- The `EvidenceChain` must remain an append-only architecture.
 
 ## Next Steps
-- Finalize the API connection between Next.js and Django for User Auth and Document Uploads.
+1. Wire up the Next.js frontend to the Django REST APIs.
+2. Build the Dashboard and Case Workspace UIs.
+3. Implement secure file download/preview APIs.
 
 ## Last Updated
-2026-08-28
+August 29, 2026

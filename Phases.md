@@ -1,55 +1,76 @@
-# Phases
-
-## Phase 0 — Project Setup
-✅ COMPLETE. Next.js and Django scaffolded.
-
-## Phase 1 — Authentication
-🟡 IN PROGRESS. Django user models and settings exist, but seamless JWT integration with Next.js is pending.
-
-## Phase 2 — User & Role Management
-🟡 IN PROGRESS. `RoleEnum` exists in `models.py`, but Django Admin / API role assignment is basic.
-
-## Phase 3 — Case Management
-✅ COMPLETE. Django models and DRF viewsets implemented. Next.js dashboard UI exists.
-
-## Phase 4 — Document Management
-🟡 IN PROGRESS. Models and basic UI exist, but the actual multipart file upload pipeline needs connection.
-
-## Phase 5 — Secure Storage
-🟡 IN PROGRESS. Currently local `MEDIA_ROOT`. Needs S3 migration.
-
-## Phase 6 — Document Integrity
-✅ COMPLETE (Data Layer). SHA-256 hash fields are present in the models.
-
-## Phase 7 — Evidence Management
-✅ COMPLETE. `EvidenceChain` model established.
-
-## Phase 8 — Audit Trail
-🟡 IN PROGRESS. `AuditLog` exists, but automatic middleware triggers need refinement.
-
-## Phase 9 — Search
-🟡 IN PROGRESS. Django ORM basic filtering; advanced search pending.
-
-## Phase 10 — AI/OCR
-🔵 PLANNED.
-
-## Phase 11 — Blockchain
-🟡 IN PROGRESS. Simulated locally via `BlockchainRecord`. Needs Hyperledger integration.
-
-## Phase 12 — Digital Signatures
-🟡 IN PROGRESS. Mocked via `DigitalSignature` model. Needs PKI/Aadhaar integration.
-
-## Phase 13 — Security Hardening
-🔵 PLANNED.
-
-## Phase 14 — Testing
-❌ BLOCKED (Requires core flows to stabilize).
-
-## Phase 15 — Deployment
-🔵 PLANNED.
-
 # Current Development Phase
-Phase 4/5. The foundational models and UI are in place, but the end-to-end multipart upload pipeline and authentication connection need finalization.
+
+**Phase 7 — Audit Trail & Refinement (IN PROGRESS)**
+The foundational backend (Django), database schema, JWT authentication, RBAC, case management, document uploading, hashing, and simulated blockchain are already implemented. The frontend is set up with Next.js but requires further integration and UI refinement to connect to all backend endpoints.
 
 # Recommended Next Phase
-Complete Phase 1 (Auth) and Phase 4 (Document Upload). The frontend must successfully POST a file to Django, Django must calculate the hash, save it, and return a success response to the UI.
+
+**Phase 8 — Frontend Integration & UI Hardening**
+The immediate next step is to ensure the Next.js frontend fully implements the UI for the existing backend capabilities. This includes building out the dashboard, case workspace, document viewers, and displaying the chain-of-custody (EvidenceChain) to the user.
+
+---
+
+# Roadmap
+
+### Phase 0 — Project setup (✅ COMPLETE)
+- **Objective:** Initialize repositories and environments.
+- **Features:** Django backend, Next.js frontend, Docker Compose.
+- **Status:** ✅ COMPLETE
+
+### Phase 1 — Authentication (✅ COMPLETE)
+- **Objective:** Secure access to the system.
+- **Features:** Custom User model, JWT token generation, Login endpoint.
+- **Modules:** `api.models.User`, `api.views.CustomTokenObtainPairView`.
+- **Status:** ✅ COMPLETE
+
+### Phase 2 — User & role management (✅ COMPLETE)
+- **Objective:** Implement RBAC.
+- **Features:** Departments, Roles (Admin, Investigator, etc.).
+- **Status:** ✅ COMPLETE
+
+### Phase 3 — Case management (✅ COMPLETE)
+- **Objective:** Allow creation and tracking of investigations.
+- **Features:** Case CRUD operations, assignment to officers.
+- **Modules:** `api.models.Case`, `api.views.CaseViewSet`.
+- **Status:** ✅ COMPLETE
+
+### Phase 4 — Document management (✅ COMPLETE)
+- **Objective:** Secure document storage.
+- **Features:** File upload to `/media/`, metadata storage.
+- **Modules:** `api.models.Document`, `api.views.DocumentViewSet`.
+- **Status:** ✅ COMPLETE
+
+### Phase 5 — Document integrity (✅ COMPLETE)
+- **Objective:** Prevent tampering.
+- **Features:** SHA-256 hash generation upon chunked file upload.
+- **Status:** ✅ COMPLETE
+
+### Phase 6 — Evidence management (✅ COMPLETE)
+- **Objective:** Chain of custody.
+- **Features:** `EvidenceChain` table tracking all interactions.
+- **Status:** ✅ COMPLETE
+
+### Phase 7 — Blockchain & Digital Signatures (🟡 IN PROGRESS)
+- **Objective:** Simulated immutability and mock signatures.
+- **Features:** `BlockchainRecord` table, mock `/sign` endpoint.
+- **Status:** 🟡 IN PROGRESS (Backend models exist, UI integration pending)
+
+### Phase 8 — Frontend Integration (🔵 PLANNED)
+- **Objective:** Connect the Next.js UI to the full API.
+- **Features:** Dashboards, case views, document viewers, audit logs UI.
+- **Status:** 🔵 PLANNED
+
+### Phase 9 — Search (🔵 PLANNED)
+- **Objective:** Make finding documents easy.
+- **Features:** Global keyword search, filtering by metadata.
+- **Status:** 🔵 PLANNED
+
+### Phase 10 — AI/OCR (🔵 PLANNED)
+- **Objective:** Automate data extraction.
+- **Features:** OCR on PDFs/Images, semantic search, case summarization.
+- **Status:** 🔵 PLANNED
+
+### Phase 11 — Security Hardening & Testing (🔵 PLANNED)
+- **Objective:** Prepare for production.
+- **Features:** Penetration testing, unit tests, fixing vulnerabilities.
+- **Status:** 🔵 PLANNED
