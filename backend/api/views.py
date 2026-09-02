@@ -230,9 +230,15 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return Response({"status": "signed"})
 
 class AuditLogViewSet(viewsets.ModelViewSet):
-    queryset = AuditLog.objects.all()
     serializer_class = AuditLogSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = AuditLog.objects.all().order_by('-timestamp')
+        resource_id = self.request.query_params.get('resource_id', None)
+        if resource_id is not None:
+            queryset = queryset.filter(resource_id=resource_id)
+        return queryset
 
 class BlockchainRecordViewSet(viewsets.ModelViewSet):
     queryset = BlockchainRecord.objects.all()

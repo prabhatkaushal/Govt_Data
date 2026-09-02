@@ -13,8 +13,10 @@ interface DocumentDetailViewProps {
   summary: string | null;
   isSummarizing: boolean;
   handleSummarize: () => Promise<void>;
-  fullText: string | null;
-  isLoadingText: boolean;
+  docData?: any;
+  fullText?: string | null;
+  isLoadingText?: boolean;
+  auditLogs?: any[];
 }
 
 export default function DocumentDetailView({
@@ -28,8 +30,10 @@ export default function DocumentDetailView({
   summary,
   isSummarizing,
   handleSummarize,
+  docData,
   fullText,
-  isLoadingText
+  isLoadingText,
+  auditLogs = [],
 }: DocumentDetailViewProps) {
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-fade-in-up">
@@ -181,6 +185,50 @@ export default function DocumentDetailView({
                     <td className="px-6 py-4 text-content-secondary">26010001 (Cyber)</td>
                     <td className="px-6 py-4 text-right text-status-verification">COMMITTED</td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
+
+        {activeTab === "Audit Trail" && (
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
+              <Lock className="w-4 h-4 text-accent" /> Access Audit Log
+            </h3>
+            <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border bg-elevated/20 text-[10px] font-bold text-content-muted tracking-[0.12em] uppercase">
+                    <th className="px-6 py-4 font-normal">Action</th>
+                    <th className="px-6 py-4 font-normal">User (Role)</th>
+                    <th className="px-6 py-4 font-normal">Timestamp</th>
+                    <th className="px-6 py-4 font-normal text-right">Metadata</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50 text-sm">
+                  {auditLogs && auditLogs.length > 0 ? (
+                    auditLogs.map((log: any) => (
+                      <tr key={log.id} className="hover:bg-elevated/40 transition-colors">
+                        <td className="px-6 py-4 text-content-primary font-bold">{log.action}</td>
+                        <td className="px-6 py-4 text-content-secondary">
+                          {log.actor_details ? `${log.actor_details.full_name} (${log.actor_details.role})` : `User ID: ${log.actor}`}
+                        </td>
+                        <td className="px-6 py-4 text-content-muted font-mono text-xs">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 text-right text-xs text-content-muted">
+                          {log.metadata_info?.description || "-"}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-content-muted text-sm italic">
+                        No audit logs available for this document.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

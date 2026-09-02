@@ -53,6 +53,7 @@ class EvidenceChainSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AuditLogSerializer(serializers.ModelSerializer):
+    actor_details = UserSerializer(source="actor", read_only=True)
     class Meta:
         model = AuditLog
         fields = '__all__'

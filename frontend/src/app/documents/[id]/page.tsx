@@ -6,7 +6,7 @@ import api from "@/lib/api";
 
 export default function DocumentDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState("Details");
-  const tabs = ["Details", "Blockchain Trace", "Versions"];
+  const tabs = ["Details", "Blockchain Trace", "Audit Trail", "Versions"];
   const [isVerifying, setIsVerifying] = useState(false);
   const [verified, setVerified] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
@@ -14,9 +14,13 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   const [docData, setDocData] = useState<any>(null);
   const [fullText, setFullText] = useState<string | null>(null);
   const [isLoadingText, setIsLoadingText] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
   useEffect(() => {
-    api.get(`/documents/${params.id}/`).then(res => setDocData(res.data)).catch(console.error);
+    api.get(`/documents/${params.id}/`).then(res => {
+      setDocData(res.data);
+      api.get(`/audit-logs/?resource_id=${res.data.document_id}`).then(aRes => setAuditLogs(aRes.data)).catch(console.error);
+    }).catch(console.error);
   }, [params.id]);
 
   useEffect(() => {
@@ -63,8 +67,10 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
       summary={summary}
       isSummarizing={isSummarizing}
       handleSummarize={handleSummarize}
+      docData={docData}
       fullText={fullText}
       isLoadingText={isLoadingText}
+      auditLogs={auditLogs}
     />
   );
 }
