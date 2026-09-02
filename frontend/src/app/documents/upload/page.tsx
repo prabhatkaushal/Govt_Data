@@ -40,8 +40,8 @@ export default function DocumentUploadPage() {
     const doUpload = async (replace = false) => {
       setUploadState('UPLOADING');
       
-      setTimeout(() => setUploadState('VALIDATING'), 1000);
-      setTimeout(() => setUploadState('HASHING'), 2500);
+      setTimeout(() => setUploadState('VALIDATING'), 200);
+      setTimeout(() => setUploadState('HASHING'), 400);
 
       const formData = new FormData();
       formData.append("file", file);
@@ -54,10 +54,8 @@ export default function DocumentUploadPage() {
 
       try {
         await api.post("/documents/", formData);
-        setTimeout(() => {
-          setUploadState('COMPLETE');
-          setTimeout(() => router.push("/documents"), 1000);
-        }, 4000); 
+        setUploadState('COMPLETE');
+        setTimeout(() => router.push("/documents"), 400);
       } catch (err: any) {
         if (err.response?.status === 409 && err.response?.data?.code === "DUPLICATE_NAME") {
           const wantReplace = window.confirm("A document with this exact file name already exists. Do you want to replace it?");

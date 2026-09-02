@@ -15,10 +15,10 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
 
   const handleGenerateReport = async () => {
     setIsGenerating(true);
-    await new Promise(res => setTimeout(res, 1500));
+    await new Promise(res => setTimeout(res, 200));
     setIsGenerating(false);
     setReportGenerated(true);
-    setTimeout(() => setReportGenerated(false), 3000);
+    setTimeout(() => setReportGenerated(false), 1000);
   };
 
   return (

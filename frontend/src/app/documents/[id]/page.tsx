@@ -36,7 +36,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
 
   const handleVerify = async () => {
     setIsVerifying(true);
-    await new Promise(res => setTimeout(res, 1500));
+    await new Promise(res => setTimeout(res, 200));
     setIsVerifying(false);
     setVerified(true);
   };
