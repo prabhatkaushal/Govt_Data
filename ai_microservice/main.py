@@ -168,7 +168,8 @@ async def semantic_search(query: str, case_ids: str = "", limit: int = 5):
             emb1 = item["embedding"]
             emb2 = query_embedding
             sim = np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
-            scored_chunks.append((sim, item))
+            if sim >= 0.15:
+                scored_chunks.append((sim, item))
             
         scored_chunks.sort(key=lambda x: x[0], reverse=True)
         top_chunks = scored_chunks[:limit]

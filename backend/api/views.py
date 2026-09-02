@@ -230,6 +230,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return Response({"status": "signed"})
 
 class AuditLogViewSet(viewsets.ModelViewSet):
+    queryset = AuditLog.objects.all()
     serializer_class = AuditLogSerializer
     permission_classes = [permissions.IsAuthenticated]
 
