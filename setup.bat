@@ -16,7 +16,7 @@ pip install -r requirements.txt
 echo Setting up database...
 python manage.py migrate
 echo Seeding mock data (Run only once)...
-python manage.py seed_db
+python manage.py seed_data
 cd ..
 
 echo.
