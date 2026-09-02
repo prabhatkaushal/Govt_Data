@@ -63,7 +63,7 @@ class Case(models.Model):
 
 class Document(models.Model):
     document_id = models.CharField(max_length=100, unique=True, db_index=True)
-    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="documents")
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="documents", null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     document_type = models.CharField(max_length=100, blank=True, null=True)
@@ -154,3 +154,12 @@ class Notification(models.Model):
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+from pgvector.django import VectorField
+
+class DocumentEmbedding(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="embeddings")
+    text_chunk = models.TextField()
+    embedding = VectorField(dimensions=384)
+    created_at = models.DateTimeField(auto_now_add=True)
+

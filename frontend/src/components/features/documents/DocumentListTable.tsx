@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FileText, ShieldCheck, AlertCircle, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FileText, ShieldCheck, AlertCircle, Trash2, Activity, RefreshCw } from "lucide-react";
 
 export interface DocumentItem {
   id: string;
@@ -19,9 +20,12 @@ interface DocumentListTableProps {
   loading: boolean;
   isLawyer: boolean;
   handleVerify: (id: string) => Promise<void>;
+  handleDelete: (id: string) => void;
+  handleReplace: (id: string) => void;
 }
 
-export default function DocumentListTable({ documents, loading, isLawyer, handleVerify }: DocumentListTableProps) {
+export default function DocumentListTable({ documents, loading, isLawyer, handleVerify, handleDelete, handleReplace }: DocumentListTableProps) {
+  const router = useRouter();
   return (
     <div className="overflow-x-auto">
       {loading ? (
@@ -85,13 +89,33 @@ export default function DocumentListTable({ documents, loading, isLawyer, handle
                     {new Date(doc.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right z-10 relative">
-                    {isLawyer && doc.status !== 'ACTIVE' && (
-                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVerify(doc.id); }} className="mr-4 text-status-verification hover:text-white transition-colors bg-status-verification/10 hover:bg-status-verification px-3 py-1 rounded text-xs">
-                        Verify
+                    <div className="flex justify-end items-center gap-1">
+                      {isLawyer && doc.status !== 'ACTIVE' && (
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVerify(doc.id); }} className="text-status-verification hover:text-white transition-colors bg-status-verification/10 hover:bg-status-verification px-3 py-1 rounded text-xs mr-2">
+                          Verify
+                        </button>
+                      )}
+                      <button 
+                        title="Generate Summary"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/documents/${doc.id}`); }} 
+                        className="p-1.5 rounded text-content-muted hover:text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-all"
+                      >
+                        <Activity className="w-4 h-4" />
                       </button>
-                    )}
-                    <div className="inline-flex items-center justify-center p-1.5 rounded text-content-muted group-hover:text-accent group-hover:bg-accent/10 transition-all pointer-events-none">
-                      <ChevronRight className="w-4 h-4" />
+                      <button 
+                        title="Replace File"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleReplace(doc.id); }} 
+                        className="p-1.5 rounded text-content-muted hover:text-accent hover:bg-accent/10 transition-all"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                      <button 
+                        title="Delete"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(doc.id); }} 
+                        className="p-1.5 rounded text-content-muted hover:text-status-critical hover:bg-status-critical/10 transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>

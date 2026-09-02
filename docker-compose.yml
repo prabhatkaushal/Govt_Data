@@ -4,17 +4,17 @@ services:
   db:
     # We use pgvector instead of standard postgres to support AI Semantic Search (RAG)
     image: ankane/pgvector:latest
-    container_name: nyayavault-db
+    container_name: secura-db
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-nyayavault}
-      POSTGRES_USER: ${POSTGRES_USER:-nyayavault_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nyayavault_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-secura}
+      POSTGRES_USER: ${POSTGRES_USER:-secura_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secura_secure_password}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nyayavault_user} -d ${POSTGRES_DB:-nyayavault}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-secura_user} -d ${POSTGRES_DB:-secura}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,7 +23,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: nyayavault-backend
+    container_name: secura-backend
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
@@ -39,14 +39,10 @@ services:
         condition: service_healthy
 
   frontend:
-    image: node:20-alpine
-    working_dir: /app
-    container_name: nyayavault-frontend
-    command: sh -c "npm install && npm run dev"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: secura-frontend
     ports:
       - "3000:3000"
     environment:
@@ -57,14 +53,19 @@ services:
   ai_microservice:
     build:
       context: ./ai_microservice
-    container_name: nyayavault-ai
+    container_name: secura-ai
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
     volumes:
       - ./ai_microservice:/app
     ports:
       - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-secura_user}:${POSTGRES_PASSWORD:-secura_secure_password}@db:5432/${POSTGRES_DB:-secura}
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
     depends_on:
       - db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
       
 volumes:
   postgres_data:

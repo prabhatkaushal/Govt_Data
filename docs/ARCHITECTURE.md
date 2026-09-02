@@ -1,6 +1,6 @@
 # 1. Architecture Overview
 
-NyayaVault follows a modern, decoupled three-tier architecture, utilizing a React-based frontend, a Django REST backend, and a relational database. 
+Secura follows a modern, decoupled three-tier architecture, utilizing a React-based frontend, a Django REST backend, and a relational database. 
 
 ```text
 User 

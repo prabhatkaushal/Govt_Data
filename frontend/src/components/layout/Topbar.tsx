@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { Search, Bell, LogOut, CheckCircle, X, Moon, Sun } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
@@ -10,6 +10,7 @@ import { useTheme } from "next-themes";
 export function Topbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
@@ -108,6 +109,12 @@ export function Topbar() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && searchQuery.trim()) {
+                        setIsSearchOpen(false);
+                        router.push("/search");
+                      }
+                    }}
                     placeholder="Search cases, documents, evidence, officers..."
                     className="flex-1 bg-transparent text-sm text-content-primary placeholder-content-muted outline-none"
                   />

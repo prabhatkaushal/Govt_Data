@@ -1,7 +1,7 @@
 # Hyperledger Fabric Blockchain Service
 
 This directory is reserved for the Hyperledger Fabric chaincode and network configuration.
-As per the NyayaVault architecture, the blockchain is used to ensure a tamper-proof chain of custody for all digital evidence.
+As per the Secura architecture, the blockchain is used to ensure a tamper-proof chain of custody for all digital evidence.
 
 ## Future Implementation Details
 1. **Chaincode (Smart Contracts):** Will be written in Go or Node.js.

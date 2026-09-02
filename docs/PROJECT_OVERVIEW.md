@@ -2,7 +2,7 @@
 
 ## PART 1 — PROJECT OVERVIEW
 
-**NyayaVault** is a robust, centralized document management platform designed specifically for law enforcement, investigative, and legal sectors. Currently, managing legal documents (like FIRs, forensics, and evidence) is plagued by fragmented storage, tampering risks, and poor accountability. NyayaVault solves this by providing a unified, cryptographically secure vault where every document is mathematically hashed upon upload, maintaining an immutable chain of custody. 
+**Secura** is a robust, centralized document management platform designed specifically for law enforcement, investigative, and legal sectors. Currently, managing legal documents (like FIRs, forensics, and evidence) is plagued by fragmented storage, tampering risks, and poor accountability. Secura solves this by providing a unified, cryptographically secure vault where every document is mathematically hashed upon upload, maintaining an immutable chain of custody. 
 
 Target users include Investigating Officers, Legal Counsel, Forensics, and Auditors who require a strict, need-to-know environment to collaborate on sensitive files. Unlike generic cloud drives, this system treats every file as legal evidence—versioning, signing, and auditing every interaction.
 
@@ -21,7 +21,7 @@ Target users include Investigating Officers, Legal Counsel, Forensics, and Audit
 | Evidence integrity & Chain of Custody | `EvidenceChain` tracks the exact lifecycle of a document. | IMPLEMENTED | `api.models.EvidenceChain`, UI Tabs |
 | Digital signatures | `DigitalSignature` model captures cryptographic hashes and signer data. | MOCK IMPLEMENTED | `api.models.DigitalSignature`, `/api/documents/{id}/sign/` |
 | Blockchain | `BlockchainRecord` mimics a linked ledger mapping document hashes. | MOCK IMPLEMENTED | `api.models.BlockchainRecord` |
-| AI/OCR | FastAPI microservice simulating PaddleOCR and LangChain. | MOCK IMPLEMENTED | `ai_microservice/main.py` |
+| AI/OCR | FastAPI microservice using PyPDF2, sentence-transformers, pgvector, and Ollama. | FULLY IMPLEMENTED | `ai_microservice/main.py` |
 | Search | Global RAG Semantic Search integrating Next.js and FastAPI. | IMPLEMENTED | `src/app/search/page.tsx` |
 
 ## PART 3 — COMPLETE TECHNOLOGY STACK
@@ -247,4 +247,4 @@ Before real law-enforcement deployment, the system requires:
 
 ## PART 25 — FINAL PROJECT SUMMARY
 
-NyayaVault is a robust Django/Next.js application demonstrating how cryptographic hashing, strict chain-of-custody tracking, and append-only version control can secure digital legal evidence. It centralizes police and legal documents into a highly secure vault, mathematically hashing them and logging every interaction to ensure no evidence can be secretly tampered with.
+Secura is a robust Django/Next.js application demonstrating how cryptographic hashing, strict chain-of-custody tracking, and append-only version control can secure digital legal evidence. It centralizes police and legal documents into a highly secure vault, mathematically hashing them and logging every interaction to ensure no evidence can be secretly tampered with.

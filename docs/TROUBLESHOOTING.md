@@ -24,7 +24,7 @@ npm install
 ```
 
 ### 3. Ensure Correct Node Version
-NyayaVault's frontend is built on Next.js 14 and React 18, which require **Node.js v18.17.0 or newer**.
+Secura's frontend is built on Next.js 14 and React 18, which require **Node.js v18.17.0 or newer**.
 Run `node -v` to check your version. If it's too old, update Node.js.
 
 ---

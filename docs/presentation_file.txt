@@ -1,5 +1,5 @@
 ======================================================
-PROJECT PRESENTATION & TECHNOLOGY STACK: NYAYAVAULT
+PROJECT PRESENTATION & TECHNOLOGY STACK: SECURA
 ======================================================
 
 1. PROJECT OVERVIEW
@@ -7,11 +7,11 @@ PROJECT PRESENTATION & TECHNOLOGY STACK: NYAYAVAULT
 Problem Statement ID: 26190
 Title: Secure Digital Evidence & Legal Document Management
 Theme: Cybersecurity & Blockchain
-Team Name: NyayaVault
+Team Name: Secura
 
 2. PROPOSED SOLUTION
 ------------------------------------------------------
-NyayaVault replaces scattered storage systems with a single, secure central vault for digital evidence.
+Secura replaces scattered storage systems with a single, secure central vault for digital evidence.
 - It utilizes SHA-256 hashing and permanent activity logs to maintain provable integrity.
 - Blockchain technology ensures a tamper-proof chain of custody.
 - Strict JWT (JSON Web Tokens) and RBAC (Role-Based Access Control) prevent any unauthorized access.

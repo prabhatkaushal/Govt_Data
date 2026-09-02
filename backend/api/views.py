@@ -9,9 +9,32 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import *
 from .serializers import *
+from cryptography.fernet import Fernet
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+import threading
+import requests
+
+def trigger_ai_pipeline(file_data, file_name, document_id):
+    try:
+        print(f"Triggering AI pipeline for {document_id}")
+        files = {'file': (file_name, file_data)}
+        ai_url = os.environ.get("AI_MICROSERVICE_URL", "http://localhost:8001")
+        ext_res = requests.post(f"{ai_url}/extract-text/", files=files)
+        if ext_res.status_code == 200:
+            text = ext_res.json().get("extracted_text", "")
+            if text.strip():
+                payload = {"document_id": document_id, "text": text}
+                emb_res = requests.post(f"{ai_url}/generate-embeddings/", json=payload)
+                print("Embeddings generated:", emb_res.json())
+            else:
+                print("No text extracted.")
+        else:
+            print("Extract text failed:", ext_res.status_code)
+    except Exception as e:
+        print("AI Pipeline failed:", e)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -74,7 +97,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
-    http_method_names = ['get', 'post', 'head', 'options']
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
 
 
     parser_classes = [MultiPartParser, FormParser]
@@ -86,7 +109,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
             return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Calculate true SHA-256
-        import hashlib
         file_hash = hashlib.sha256()
         for chunk in file_obj.chunks():
             file_hash.update(chunk)
@@ -96,9 +118,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
         file_obj.seek(0)
         
         # Mock AES-256 encryption and saving to S3
-        import uuid
-        from cryptography.fernet import Fernet
-        
         # In a real scenario, this key would be in settings.py
         key = Fernet.generate_key()
         cipher = Fernet(key)
@@ -118,6 +137,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
         with open(full_path, 'wb') as ef:
             ef.write(encrypted_data)
             
+        file_obj.seek(0)
+        unencrypted_data = file_obj.read()
+        threading.Thread(target=trigger_ai_pipeline, args=(unencrypted_data, file_name, doc_id)).start()
+        
         # Add the computed fields to the request data
         mutable_data = request.data.copy()
         mutable_data['document_id'] = doc_id
@@ -128,6 +151,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
         mutable_data['mime_type'] = file_obj.content_type
         
         serializer = self.get_serializer(data=mutable_data)
+        if not serializer.is_valid():
+            print("VALIDATION ERROR:", serializer.errors)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
@@ -140,8 +165,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
             block_number=BlockchainRecord.objects.count() + 1000,
             action="UPLOAD",
             actor=request.user,
-            hash_signature=sha256_hex,
-            verification_status="PENDING"
+            document_hash=sha256_hex,
+            status="PENDING"
         )
         
         AuditLog.objects.create(

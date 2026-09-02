@@ -1,6 +1,6 @@
 # 1. Design Philosophy
 
-The NyayaVault design system is built to convey trust, security, and authority. 
+The Secura design system is built to convey trust, security, and authority. 
 **Style:** SECURE + PROFESSIONAL + MODERN + GOVERNMENT-GRADE + INVESTIGATION-FOCUSED.
 It is not a generic SaaS dashboard; it must feel like a secure investigative environment. Information density should be high but highly organized.
 

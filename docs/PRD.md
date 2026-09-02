@@ -1,6 +1,6 @@
 # 1. Project Overview
 
-**Project Name:** NyayaVault - Secure Digital Document Management System
+**Project Name:** Secura - Secure Digital Document Management System
 
 **One-line description:** A centralized, highly secure platform for law enforcement, investigation, and legal personnel to manage sensitive documents with strict access controls and verifiable integrity.
 

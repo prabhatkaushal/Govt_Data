@@ -48,9 +48,7 @@ export default function DocumentUploadPage() {
     formData.append("remarks", remarks);
 
     try {
-      await api.post("/documents/", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      await api.post("/documents/", formData);
       setTimeout(() => {
         setUploadState('COMPLETE');
         setTimeout(() => router.push("/documents"), 1000);

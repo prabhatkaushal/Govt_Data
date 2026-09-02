@@ -37,6 +37,29 @@ export default function DocumentsPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this document?")) return;
+    try {
+      await api.delete(`/documents/${id}/`);
+      fetchDocs();
+    } catch (err) {
+      console.error("Failed to delete", err);
+      alert("Failed to delete document.");
+    }
+  };
+
+  const handleReplace = (id: string) => {
+    alert("File replacement protocol requires a new cryptographic hash and chain of custody entry. Feature currently locked to maintain audit trail integrity.");
+  };
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredDocuments = documents.filter(doc => 
+    doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    doc.document_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (doc.case && doc.case.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -73,6 +96,8 @@ export default function DocumentsPage() {
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-content-muted group-focus-within:text-accent transition-colors" />
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search documents by ID, title, or case..." 
               className="w-full bg-surface border border-border rounded pl-9 pr-4 py-2 text-sm text-content-primary focus:outline-none focus:border-accent/50 focus:bg-elevated transition-colors"
             />
@@ -97,10 +122,12 @@ export default function DocumentsPage() {
 
         {/* DATA TABLE */}
         <DocumentListTable 
-          documents={documents}
+          documents={filteredDocuments}
           loading={loading}
           isLawyer={isLawyer}
           handleVerify={handleVerify}
+          handleDelete={handleDelete}
+          handleReplace={handleReplace}
         />
       </motion.div>
     </motion.div>

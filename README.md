@@ -1,73 +1,57 @@
-# NyayaVault - Secure Digital Evidence & Legal Document Management Platform
+# Secura - Secure Digital Evidence & Legal Document Management Platform
 
 **SIH Problem Statement ID:** 26190
 
 ## Overview
-NyayaVault is a centralized, highly secure platform designed for authorized law enforcement, investigation, forensic, legal, and audit personnel. It provides an end-to-end digital evidence management solution with an immutable chain of custody, document integrity verification (SHA-256), simulated blockchain anchoring, and digital signatures.
+Secura is a highly secure, centralized platform designed for authorized law enforcement, investigation, forensic, legal, and audit personnel. It provides an end-to-end digital evidence management solution with an immutable chain of custody, document integrity verification (SHA-256), mock blockchain anchoring, and **AI-powered Semantic Search & Summarization** running 100% locally to guarantee zero data leakage.
 
-## Features
-* **Secure Access:** Role-Based Access Control (RBAC) with JWT authentication.
-* **Case Management:** Create, track, and manage legal cases securely.
-* **Document Management:** Secure upload, classification, version control, and preview of confidential documents.
-* **Evidence Integrity:** SHA-256 hashing for all uploaded files to guarantee no tampering.
-* **Digital Signatures:** Prototype HMAC-based digital signatures to authenticate case files.
-* **Blockchain Verification:** Simulated local ledger to anchor document hashes in an immutable chain.
-* **Chain of Custody:** Detailed chronologic timeline for every action taken on an evidence file.
-* **Auditability:** Complete audit logs mapping every system event with IP and actor details.
-* **AI Assistance:** Mock AI endpoints demonstrating how classification, summarization, and smart search integrate.
-* **Cybersecurity Dashboard:** Visual monitoring of the system's security score and active alerts.
+## Architecture
+Secura is built on a modern, decoupled microservices architecture:
+* **Frontend (Port 3000):** Next.js 14, React 18, TypeScript, Tailwind CSS
+* **Core Backend (Port 8000):** Django 5, DRF, SQLite (default fallback) / PostgreSQL
+* **AI Microservice (Port 8001):** FastAPI, \sentence-transformers\, \PyPDF2\
+* **Local LLM Engine:** Ollama (Llama 3) for zero-telemetry natural language synthesis
 
-## Tech Stack
-* **Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS, framer-motion
-* **Backend:** Django 5, Django REST Framework (DRF)
-* **Database:** SQLite (default for development)
-* **Authentication:** JWT via `djangorestframework-simplejwt`
-* **Containerization:** Docker & Docker Compose (Optional)
+## Key Features
+1. **Secure File Vault:** AES-256 encrypted uploads with strict Role-Based Access Control (RBAC).
+2. **AI Semantic Search:** Search through thousands of case documents using meaning and context (Cosine Similarity vector search) rather than just keywords.
+3. **AI Document Synthesis:** Instantly generate bullet-point summaries of lengthy legal documents and FIRs using Llama 3.
+4. **Audit Trail & Chain of Custody:** Every action (view, download, upload) is logged immutably.
+5. **Cryptographic Integrity:** SHA-256 hashing verifies that documents have not been tampered with since upload.
 
-## Installation
+## Installation & Setup (Local Development)
+
+The system is configured to run entirely natively on your machine without requiring Docker, utilizing SQLite and an In-Memory Vector Store for rapid testing.
 
 ### Prerequisites
 * Node.js v18+ 
 * Python 3.10+
+* Ollama installed locally ([ollama.com](https://ollama.com))
 
-### Environment Variables
-No strict environment variables are required out-of-the-box for local SQLite development, but you can configure database URLs in `.env` if using PostgreSQL.
+### 1. Download Local AI Model
+Before starting the app, ensure you pull the Llama 3 model into Ollama:
+\\\ash
+ollama run llama3
+\\\
 
-### Running Locally (Without Docker)
+### 2. Run the Setup Script
+Open a terminal in the root folder and run the setup script. This will install all Python and Node dependencies, migrate the database, and seed it with demo data.
+\\\ash
+setup.bat
+\\\
+*(If on Mac/Linux, simply run the commands inside setup.bat manually).*
 
-#### Backend (Django)
-```bash
-cd backend
-python -m venv venv
-# On Windows: venv\Scripts\activate
-# On Mac/Linux: source venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py seed_data
-python manage.py runserver 0.0.0.0:8000
-```
+### 3. Start the Application
+Double-click \start.bat\ or run it from your terminal:
+\\\ash
+start.bat
+\\\
+This will spawn three terminal windows running the Frontend (3000), Backend (8000), and AI Engine (8001).
 
-#### Frontend (Next.js)
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## Demo Accounts
+The system is seeded with fictional data for demonstration purposes. Use any of the following credentials to log in:
+* **Admin:** \26000000\ / \gov123\
+* **Investigator:** \26010001\ / \gov123\
 
-## Seed Data & Demo Accounts
-The system is seeded with fictional data for demonstration purposes. Use the following accounts to test RBAC logic:
-* **Admin:** `admin` / `password` (Super Admin)
-* **Investigator:** `investigator@nyayavault.gov` / `password`
-* **Forensic:** `forensic@nyayavault.gov` / `password`
-* **Legal:** `legal@nyayavault.gov` / `password`
-* **Auditor:** `auditor@nyayavault.gov` / `password`
-
-## API Documentation
-Once the backend is running, the OpenAPI/Swagger documentation is available at:
-`http://localhost:8000/docs`
-
-## Future Enhancements
-* Replace local simulated blockchain with Hyperledger Fabric or an Ethereum private network.
-* Integrate PKI-based digital signatures (eSign/Aadhaar integration).
-* Implement real OCR and LLM (OpenAI/Gemini) for the AI Service abstraction.
-* Integrate AWS S3 / Azure Blob Storage for scalable, encrypted document storage.
+## Team Notes
+Please ensure no mock/dummy files remain in the root directory before pushing to production. Sample evidence files for testing uploads can be found in the \docs/\ folder.

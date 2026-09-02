@@ -10,6 +10,11 @@ interface DocumentDetailViewProps {
   isVerifying: boolean;
   verified: boolean;
   handleVerify: () => Promise<void>;
+  summary: string | null;
+  isSummarizing: boolean;
+  handleSummarize: () => Promise<void>;
+  fullText: string | null;
+  isLoadingText: boolean;
 }
 
 export default function DocumentDetailView({
@@ -19,7 +24,12 @@ export default function DocumentDetailView({
   tabs,
   isVerifying,
   verified,
-  handleVerify
+  handleVerify,
+  summary,
+  isSummarizing,
+  handleSummarize,
+  fullText,
+  isLoadingText
 }: DocumentDetailViewProps) {
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-fade-in-up">
@@ -91,12 +101,18 @@ export default function DocumentDetailView({
             <div className="xl:col-span-8 space-y-12">
               <div className="space-y-4">
                 <h3 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 border-b border-border pb-2">
-                  <FileText className="w-4 h-4 text-accent" /> File Contents (Preview)
+                  <FileText className="w-4 h-4 text-accent" /> File Contents (Decrypted Text)
                 </h3>
-                <div className="bg-surface/30 p-6 rounded border border-border/50 font-mono text-[11px] text-content-muted overflow-auto max-h-[300px] space-y-1">
-                   <span className="text-accent">[2023-10-12 04:12:33]</span> <span className="text-status-verification">INFO:</span> Server boot sequence initiated.<br/>
-                   <span className="text-accent">[2023-10-12 04:15:01]</span> <span className="text-status-warning">WARN:</span> Unauthorized access attempt from IP 192.168.1.104.<br/>
-                   <span className="text-accent">[2023-10-12 04:15:10]</span> <span className="text-status-critical font-bold">CRITICAL:</span> System lockdown engaged by security protocol Alpha.<br/>
+                <div className="bg-surface/30 p-6 rounded border border-border/50 font-mono text-[11px] text-content-primary overflow-auto max-h-[500px] space-y-1 whitespace-pre-wrap">
+                  {isLoadingText ? (
+                    <div className="flex items-center gap-2 text-content-muted">
+                      <Activity className="w-4 h-4 animate-spin" /> Decrypting and loading text...
+                    </div>
+                  ) : fullText ? (
+                    fullText
+                  ) : (
+                    <span className="text-content-muted italic">No text content available for this document.</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -116,6 +132,28 @@ export default function DocumentDetailView({
                    </div>
                  </dl>
               </div>
+
+              <div className="bg-[#8B5CF6]/5 border border-[#8B5CF6]/20 rounded p-6 relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-1 h-full bg-[#8B5CF6]" />
+                 <h3 className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
+                   <span className="flex items-center gap-2"><Activity className="w-3.5 h-3.5" /> AI Synthesis</span>
+                   <button 
+                     onClick={handleSummarize}
+                     disabled={isSummarizing}
+                     className="bg-[#8B5CF6]/20 hover:bg-[#8B5CF6]/30 text-[#8B5CF6] px-2 py-1 rounded transition-colors disabled:opacity-50"
+                   >
+                     {isSummarizing ? "GENERATING..." : "SUMMARIZE"}
+                   </button>
+                 </h3>
+                 <div className="text-content-primary text-xs leading-relaxed space-y-2 font-medium">
+                   {summary ? (
+                     <div className="whitespace-pre-wrap">{summary}</div>
+                   ) : (
+                     <p className="text-content-muted italic">Click summarize to generate an AI analysis of this document.</p>
+                   )}
+                 </div>
+              </div>
+
             </div>
           </div>
         )}
