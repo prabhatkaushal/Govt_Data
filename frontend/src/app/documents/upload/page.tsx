@@ -8,8 +8,10 @@ import { Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import DocumentUploadForm from "@/components/features/documents/DocumentUploadForm";
 import SecurityProtocolPanel from "@/components/features/documents/SecurityProtocolPanel";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DocumentUploadPage() {
+  const { isInvestigator } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefilledCase = searchParams.get("caseId") || "";
@@ -32,32 +34,48 @@ export default function DocumentUploadPage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isInvestigator) return alert("Only Investigators have the authority to upload documents.");
     if (!file) return alert("Please select a file");
 
-    setUploadState('UPLOADING');
-    
-    setTimeout(() => setUploadState('VALIDATING'), 1000);
-    setTimeout(() => setUploadState('HASHING'), 2500);
+    const doUpload = async (replace = false) => {
+      setUploadState('UPLOADING');
+      
+      setTimeout(() => setUploadState('VALIDATING'), 1000);
+      setTimeout(() => setUploadState('HASHING'), 2500);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("document_type", documentType);
-    if (caseId) formData.append("case", caseId);
-    formData.append("confidentiality_level", confidentiality);
-    formData.append("remarks", remarks);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("document_type", documentType);
+      if (caseId) formData.append("case", caseId);
+      formData.append("confidentiality_level", confidentiality);
+      formData.append("remarks", remarks);
+      if (replace) formData.append("replace", "true");
 
-    try {
-      await api.post("/documents/", formData);
-      setTimeout(() => {
-        setUploadState('COMPLETE');
-        setTimeout(() => router.push("/documents"), 1000);
-      }, 4000); 
-    } catch (err) {
-      console.error("Upload failed", err);
-      alert("Failed to upload document");
-      setUploadState('IDLE');
-    }
+      try {
+        await api.post("/documents/", formData);
+        setTimeout(() => {
+          setUploadState('COMPLETE');
+          setTimeout(() => router.push("/documents"), 1000);
+        }, 4000); 
+      } catch (err: any) {
+        if (err.response?.status === 409 && err.response?.data?.code === "DUPLICATE_NAME") {
+          const wantReplace = window.confirm("A document with this exact file name already exists. Do you want to replace it?");
+          if (wantReplace) {
+            doUpload(true);
+            return;
+          } else {
+            setUploadState('IDLE');
+            return;
+          }
+        }
+        console.error("Upload failed", err);
+        alert("Failed to upload document");
+        setUploadState('IDLE');
+      }
+    };
+
+    await doUpload();
   };
 
   const containerVariants = {

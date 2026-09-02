@@ -108,6 +108,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if not file_obj:
             return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
         
+        file_name = file_obj.name
+        existing_doc = Document.objects.filter(file_name=file_name).first()
+        if existing_doc:
+            if request.POST.get('replace') == 'true':
+                existing_doc.delete()
+            else:
+                return Response({"error": "File with this name already exists", "code": "DUPLICATE_NAME"}, status=status.HTTP_409_CONFLICT)
+
         # Calculate true SHA-256
         file_hash = hashlib.sha256()
         for chunk in file_obj.chunks():

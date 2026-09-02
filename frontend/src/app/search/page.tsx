@@ -121,9 +121,6 @@ export default function SearchPage() {
                           {doc.document_id}
                         </span>
                       </div>
-                      <div className="text-[10px] font-mono flex items-center gap-1 text-status-verification bg-status-verification/10 px-2 py-0.5 rounded border border-status-verification/20">
-                        {(doc.similarity_score * 100).toFixed(0)}% MATCH
-                      </div>
                     </div>
                     <p className="text-xs text-content-secondary leading-relaxed pl-7 border-l-2 border-border/50 ml-[7px] mt-3 italic">
                       "{doc.snippet}"

@@ -6,7 +6,7 @@ import api from "@/lib/api";
 
 export default function DocumentDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState("Details");
-  const tabs = ["Details", "Blockchain Trace", "Audit Trail", "Versions"];
+  const tabs = ["Details", "Blockchain Trace", "Versions"];
   const [isVerifying, setIsVerifying] = useState(false);
   const [verified, setVerified] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
