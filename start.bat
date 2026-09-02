@@ -3,12 +3,6 @@ echo ========================================================
 echo Starting Secura Services
 echo ========================================================
 
-echo Clearing old documents from database to sync with AI memory...
-cd backend
-call venv\Scripts\activate
-python manage.py shell -c "from api.models import Document; Document.objects.all().delete()"
-cd ..
-
 echo Starting Django Backend on port 8000...
 start cmd /k "cd backend && call venv\Scripts\activate && python manage.py runserver 8000"
 

@@ -43,8 +43,21 @@ def get_db_connection():
         import sqlite3
         return sqlite3.connect(DB_PATH), "?"
 
+import os
+import pickle
+
 # Global in-memory vector store for fallback without postgres
-IN_MEMORY_VECTOR_STORE = []
+VECTOR_STORE_PATH = "vector_store.pkl"
+if os.path.exists(VECTOR_STORE_PATH):
+    try:
+        with open(VECTOR_STORE_PATH, "rb") as f:
+            IN_MEMORY_VECTOR_STORE = pickle.load(f)
+        print(f"Loaded {len(IN_MEMORY_VECTOR_STORE)} chunks from persistent vector store.")
+    except Exception as e:
+        print(f"Error loading vector store: {e}")
+        IN_MEMORY_VECTOR_STORE = []
+else:
+    IN_MEMORY_VECTOR_STORE = []
 
 @app.get("/")
 def health_check():
@@ -113,6 +126,10 @@ async def generate_embeddings(req: EmbedRequest):
                 "text_chunk": chunk,
                 "embedding": emb
             })
+            
+        with open(VECTOR_STORE_PATH, "wb") as f:
+            pickle.dump(IN_MEMORY_VECTOR_STORE, f)
+            
     except Exception as e:
         logger.error(f"Error storing embeddings: {e}")
     finally:
