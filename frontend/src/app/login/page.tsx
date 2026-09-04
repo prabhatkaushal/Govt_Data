@@ -140,7 +140,7 @@ export default function LoginPage() {
 
               <div className="flex justify-end pt-0.5 pb-1">
                 <a href="#" className="text-[13px] font-medium text-[#3C9D91] hover:text-[#4EB3A6] transition-colors focus:outline-none focus:underline">
-                  Forgot passcode?
+                  forget deatils
                 </a>
               </div>
 

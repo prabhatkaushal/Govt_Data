@@ -10,9 +10,10 @@ class Command(BaseCommand):
     help = 'Seeds the database with initial data'
 
     def handle(self, *args, **kwargs):
-        if User.objects.exists():
-            self.stdout.write(self.style.WARNING("Database already seeded"))
-            return
+        self.stdout.write("Clearing existing data...")
+        Case.objects.all().delete()
+        User.objects.all().delete()
+        Department.objects.all().delete()
 
         self.stdout.write("Seeding departments...")
         depts = [
@@ -26,11 +27,11 @@ class Command(BaseCommand):
 
         self.stdout.write("Seeding users...")
         users = [
-            User(username="26000000", employee_id="EMP001", full_name="Super Admin", email="admin@secura.gov", password=make_password("gov123"), role=RoleEnum.SUPER_ADMIN),
+            User(username="26000001", employee_id="EMP001", full_name="Super Admin", email="admin@secura.gov", password=make_password("gov123"), role=RoleEnum.SUPER_ADMIN),
             User(username="26010001", employee_id="EMP002", full_name="Inspector Rahul Sharma", email="investigator@secura.gov", password=make_password("gov123"), role=RoleEnum.INVESTIGATING_OFFICER, department=depts[0]),
-            User(username="26010002", employee_id="EMP003", full_name="Dr. Anita Mehta", email="forensic@secura.gov", password=make_password("gov123"), role=RoleEnum.FORENSIC_OFFICER, department=depts[2]),
-            User(username="26010003", employee_id="EMP004", full_name="Advocate Priya Patel", email="legal@secura.gov", password=make_password("gov123"), role=RoleEnum.LEGAL_OFFICER, department=depts[3]),
-            User(username="26010004", employee_id="EMP005", full_name="Auditor Verma", email="auditor@secura.gov", password=make_password("gov123"), role=RoleEnum.AUDITOR),
+            User(username="26020001", employee_id="EMP003", full_name="Dr. Anita Mehta", email="forensic@secura.gov", password=make_password("gov123"), role=RoleEnum.FORENSIC_OFFICER, department=depts[2]),
+            User(username="26030001", employee_id="EMP004", full_name="Advocate Priya Patel", email="legal@secura.gov", password=make_password("gov123"), role=RoleEnum.LEGAL_OFFICER, department=depts[3]),
+            User(username="26040001", employee_id="EMP005", full_name="Auditor Verma", email="auditor@secura.gov", password=make_password("gov123"), role=RoleEnum.AUDITOR),
         ]
         User.objects.bulk_create(users)
         investigator = User.objects.get(username="26010001")
