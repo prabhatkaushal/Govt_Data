@@ -51,12 +51,6 @@ export function Sidebar() {
       name: "DOCUMENTS",
       items: [
         { name: "Documents Vault", href: "/documents", icon: FileText },
-        { name: "Upload Document", href: "/documents/upload", icon: Upload },
-      ]
-    },
-    {
-      name: "EVIDENCE",
-      items: [
         { name: "Upload Section", href: "/documents/upload", icon: Upload },
       ]
     },

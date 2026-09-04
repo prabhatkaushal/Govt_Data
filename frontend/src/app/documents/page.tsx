@@ -131,11 +131,6 @@ export default function DocumentsPage() {
           </h1>
           <p className="text-content-muted mt-2 text-xs font-mono tracking-widest uppercase">Secure document repository</p>
         </div>
-        {isInvestigator && (
-          <Link href="/documents/upload" className="bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 px-5 py-2.5 rounded text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-2">
-            <Upload className="w-4 h-4" /> UPLOAD DOCUMENT
-          </Link>
-        )}
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-4">

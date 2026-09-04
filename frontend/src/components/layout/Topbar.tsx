@@ -93,7 +93,7 @@ export function Topbar() {
             }`}
           >
             <Search className="w-3.5 h-3.5 shrink-0" />
-            <span className="flex-1 text-left text-xs">Search cases, documents, evidence...</span>
+            <span className="flex-1 text-left text-xs">Global Semantic Search...</span>
             <kbd className="hidden sm:inline-flex items-center gap-1 text-[10px] text-content-muted font-mono border border-border rounded px-1.5 py-0.5 bg-background/50">
               ⌘K
             </kbd>
@@ -122,7 +122,7 @@ export function Topbar() {
                         router.push("/search");
                       }
                     }}
-                    placeholder="Search cases, documents, evidence, officers..."
+                    placeholder="Global semantic search across cases, documents, evidence..."
                     className="flex-1 bg-transparent text-sm text-content-primary placeholder-content-muted outline-none"
                   />
                   <button onClick={() => setIsSearchOpen(false)} className="text-content-muted hover:text-content-primary transition-colors">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ShieldCheck, Lock, AlertOctagon, User, Eye, Users, Hexagon, Search } from "lucide-react";
+import { ShieldCheck, Lock, AlertOctagon, User, Eye, Users, Hexagon, Search, Link2, Scale, Database } from "lucide-react";
 import { motion } from "framer-motion";
 import { SecureBackground3D } from "@/components/SecureBackground3D";
 
@@ -44,46 +44,35 @@ export default function LoginPage() {
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#3C9D91]/30 to-transparent" />
 
         {/* Left Section (Branding & Features) */}
-        <div className="w-full md:w-[48%] p-8 lg:p-12 bg-[#172326]/60 border-b md:border-b-0 md:border-r border-[#304347] flex flex-col justify-center">
-          <div className="max-w-[340px] mx-auto md:mx-0 w-full">
-            <div className="w-12 h-12 rounded-2xl bg-[#1A292C] flex items-center justify-center border border-[#304347] text-[#3C9D91] mb-5 shadow-inner">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            
-            <h1 className="text-[28px] font-semibold text-[#EDF3F1] mb-1 tracking-tight">SECURA</h1>
-            <p className="text-[#9DAFAD] text-[15px] font-medium">Secure Case Intelligence</p>
-            
-            <div className="w-10 h-[3px] bg-[#3C9D91] my-5 rounded-full opacity-80" />
-            
-            <p className="text-[#9DAFAD] font-medium mb-6 text-[14px]">Protected case and evidence management</p>
-            
-            <div className="space-y-3 hidden sm:block">
-              <div className="flex items-center gap-4 group p-2 -ml-2 rounded-xl transition-all duration-300 hover:bg-[#1A292C]/50 hover:border-[#3C9D91]/30 hover:shadow-[inset_0_0_15px_rgba(60,157,145,0.08)] border border-transparent cursor-default">
-                <div className="w-9 h-9 rounded-[10px] bg-[#1A292C] flex items-center justify-center text-[#3C9D91] border border-[#304347] transition-all duration-300 group-hover:border-[#3C9D91]/50 group-hover:bg-[#121D20]">
-                  <Lock className="w-[16px] h-[16px]" />
-                </div>
-                <span className="text-[13px] font-medium text-[#EDF3F1]">End-to-end encryption</span>
-              </div>
+        <div className="w-full md:w-[50%] p-8 lg:p-12 bg-gradient-to-b from-[#0d1518] to-[#111b21] border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col justify-center relative overflow-hidden">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#14b8a6] rounded-full blur-[120px] opacity-10" />
+             <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#2dd4bf] rounded-full blur-[120px] opacity-10" />
+          </div>
+
+          <div className="max-w-[420px] mx-auto md:mx-0 w-full relative z-10 flex flex-col items-center md:items-start text-center md:text-left mt-10">
+            {/* Header & Branding */}
+            <div className="mb-10 w-full flex flex-col items-center md:items-start text-center md:text-left">
+              <h1 className="text-5xl md:text-6xl font-bold tracking-widest mb-6 bg-gradient-to-r from-white via-white to-[#2dd4bf] bg-clip-text text-transparent drop-shadow-sm">
+                SECURA
+              </h1>
               
-              <div className="flex items-center gap-4 group p-2 -ml-2 rounded-xl transition-all duration-300 hover:bg-[#1A292C]/50 hover:border-[#3C9D91]/30 hover:shadow-[inset_0_0_15px_rgba(60,157,145,0.08)] border border-transparent cursor-default">
-                <div className="w-9 h-9 rounded-[10px] bg-[#1A292C] flex items-center justify-center text-[#3C9D91] border border-[#304347] transition-all duration-300 group-hover:border-[#3C9D91]/50 group-hover:bg-[#121D20]">
-                  <Users className="w-[16px] h-[16px]" />
-                </div>
-                <span className="text-[13px] font-medium text-[#EDF3F1]">Role-based access control</span>
-              </div>
+              <p className="text-[#14b8a6]/90 italic text-lg leading-relaxed max-w-sm mb-12">
+                "Safeguarding evidentiary integrity from first report to final verdict."
+              </p>
 
-              <div className="flex items-center gap-4 group p-2 -ml-2 rounded-xl transition-all duration-300 hover:bg-[#1A292C]/50 hover:border-[#3C9D91]/30 hover:shadow-[inset_0_0_15px_rgba(60,157,145,0.08)] border border-transparent cursor-default">
-                <div className="w-9 h-9 rounded-[10px] bg-[#1A292C] flex items-center justify-center text-[#3C9D91] border border-[#304347] transition-all duration-300 group-hover:border-[#3C9D91]/50 group-hover:bg-[#121D20]">
-                  <Hexagon className="w-[16px] h-[16px]" />
+              <div className="w-full space-y-4">
+                <div className="bg-white/[0.03] backdrop-blur-md border border-slate-700/50 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                  <h3 className="text-white font-medium text-base tracking-wide">
+                    Digitalized and Centralized Storage
+                  </h3>
                 </div>
-                <span className="text-[13px] font-medium text-[#EDF3F1]">Blockchain verification</span>
-              </div>
-
-              <div className="flex items-center gap-4 group p-2 -ml-2 rounded-xl transition-all duration-300 hover:bg-[#1A292C]/50 hover:border-[#3C9D91]/30 hover:shadow-[inset_0_0_15px_rgba(60,157,145,0.08)] border border-transparent cursor-default">
-                <div className="w-9 h-9 rounded-[10px] bg-[#1A292C] flex items-center justify-center text-[#3C9D91] border border-[#304347] transition-all duration-300 group-hover:border-[#3C9D91]/50 group-hover:bg-[#121D20]">
-                  <Search className="w-[16px] h-[16px]" />
+                <div className="bg-white/[0.03] backdrop-blur-md border border-slate-700/50 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                  <h3 className="text-white font-medium text-base tracking-wide">
+                    Secure Access
+                  </h3>
                 </div>
-                <span className="text-[13px] font-medium text-[#EDF3F1]">AI-powered search</span>
               </div>
             </div>
           </div>
