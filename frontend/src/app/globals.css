@@ -4,73 +4,143 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --background: #F1F5F9;
+    --surface: #FFFFFF;
+    --elevated: #F8FAFC;
+    --border: #E2E8F0;
+    --border-hover: #CBD5E1;
+    --content-primary: #0F172A;
+    --content-secondary: #334155;
+    --content-muted: #64748B;
+    --accent: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-muted: rgba(37, 99, 235, 0.08);
+    --status-verification: #059669;
+    --status-warning: #D97706;
+    --status-critical: #DC2626;
+    --status-ai: #6366F1;
+    --status-blockchain: #0284C7;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: #060B14;
+    --surface: #0D131F;
+    --elevated: #131B2A;
+    --border: #1E293B;
+    --border-hover: #334155;
+    --content-primary: #F8FAFC;
+    --content-secondary: #94A3B8;
+    --content-muted: #475569;
+    --accent: #38BDF8;
+    --accent-hover: #0EA5E9;
+    --accent-muted: rgba(56, 189, 248, 0.1);
+    --status-verification: #0E956A;
+    --status-warning: #E88D14;
+    --status-critical: #D92E2E;
+    --status-ai: #7B5EE4;
+    --status-blockchain: #0C8CE9;
+  }
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+  .theme-legal {
+    --background: #FDFBF7;
+    --surface: #FFFFFF;
+    --elevated: #FFFDF9;
+    --border: #E8E2D2;
+    --border-hover: #D8CEB8;
+    --content-primary: #382A1B;
+    --content-secondary: #6B5B4C;
+    --content-muted: #9E8E7D;
+    --accent: 210 100% 60%;
+    --accent-hover: 210 100% 70%;
+  }
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+  .dark .theme-legal {
+    --background: #110E0B;
+    --surface: #1C1713;
+    --elevated: #26201B;
+    --border: #3A322A;
+    --border-hover: #50453B;
+    --content-primary: #F4ECE1;
+    --content-secondary: #BFA992;
+    --content-muted: #807161;
+    --accent: #D4AF37;
+    --accent-hover: #F3E5AB;
+    --accent-muted: rgba(212, 175, 55, 0.1);
+  }
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+  body.theme-legal {
+    --font-sans: var(--font-legal-sans);
+    --font-display: var(--font-legal-display);
+  }
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+  body {
+    background-color: var(--background);
+    color: var(--content-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  
+  /* Apply display font to all headings for that creative look */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* Custom Scrollbar for a premium dark feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Ambient Background Components - HIDING THESE FOR MINIMALIST LOOK */
+.ambient-layer {
+  display: none !important;
+}
+
+.ambient-grid {
+  display: none !important;
+}
+
+.ambient-glow {
+  display: none !important;
+}
+
+/* Base focus rings */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline */
+input:focus, select:focus, textarea:focus, button:focus {
+  outline: none;
+}
+
+/* Redefine shadow utility for a soft minimalist feel on cards */
+.shadow-premium {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+body.mobile-sidebar-open aside#sidebar {
+  display: flex !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  background-color: var(--surface);
 }

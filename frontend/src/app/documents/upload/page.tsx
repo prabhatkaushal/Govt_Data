@@ -1,121 +1,140 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Upload } from "lucide-react";
+import { motion } from "framer-motion";
+import DocumentUploadForm from "@/components/documents/DocumentUploadForm";
+import SecurityProtocolPanel from "@/components/documents/SecurityProtocolPanel";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DocumentUploadPage() {
+  const { isInvestigator } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefilledCase = searchParams.get("caseId") || "";
+
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [caseId, setCaseId] = useState(prefilledCase);
+  const [confidentiality, setConfidentiality] = useState("CONFIDENTIAL");
+  const [remarks, setRemarks] = useState("");
+  
+  useEffect(() => {
+    if (prefilledCase) {
+      setCaseId(prefilledCase);
+    }
+  }, [prefilledCase]);
+  
+  const [uploadState, setUploadState] = useState<'IDLE' | 'UPLOADING' | 'VALIDATING' | 'HASHING' | 'COMPLETE'>('IDLE');
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isInvestigator) return alert("Only Investigators have the authority to upload documents.");
+    if (!file) return alert("Please select a file");
+
+    const doUpload = async (replace = false) => {
+      setUploadState('UPLOADING');
+      
+      setTimeout(() => setUploadState('VALIDATING'), 200);
+      setTimeout(() => setUploadState('HASHING'), 400);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("document_type", documentType);
+      if (caseId) formData.append("case", caseId);
+      formData.append("confidentiality_level", confidentiality);
+      formData.append("remarks", remarks);
+      if (replace) formData.append("replace", "true");
+
+      try {
+        await api.post("/documents/", formData);
+        setUploadState('COMPLETE');
+        setTimeout(() => router.push("/documents"), 400);
+      } catch (err: any) {
+        if (err.response?.status === 409 && err.response?.data?.code === "DUPLICATE_NAME") {
+          const wantReplace = window.confirm("A document with this exact file name already exists. Do you want to replace it?");
+          if (wantReplace) {
+            doUpload(true);
+            return;
+          } else {
+            setUploadState('IDLE');
+            return;
+          }
+        }
+        console.error("Upload failed", err);
+        alert("Failed to upload document");
+        setUploadState('IDLE');
+      }
+    };
+
+    await doUpload();
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { ease: [0.22, 1, 0.36, 1] as const, duration: 0.4 } }
+  };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
-        <Link href="/documents" className="hover:text-white transition-colors">Documents</Link>
+    <motion.div 
+      className="space-y-8 max-w-[1200px] mx-auto"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={itemVariants} className="flex items-center gap-3 text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase mb-[-1rem]">
+        <Link href="/documents" className="hover:text-content-primary transition-colors">Documents</Link>
         <span>/</span>
-        <span className="text-slate-200">Upload</span>
+        <span className="text-content-primary">Upload</span>
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="flex items-start gap-4 pb-6 border-b border-border">
+        <div className="w-12 h-12 rounded bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+          <Upload className="w-5 h-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary tracking-wide uppercase">Secure Document Ingestion</h1>
+          <p className="text-content-muted mt-2 text-xs font-mono tracking-widest uppercase">All files are cryptographically hashed and anchored.</p>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+        <DocumentUploadForm 
+          handleUpload={handleUpload}
+          isDragging={isDragging}
+          setIsDragging={setIsDragging}
+          file={file}
+          setFile={setFile}
+          title={title}
+          setTitle={setTitle}
+          documentType={documentType}
+          setDocumentType={setDocumentType}
+          caseId={caseId}
+          setCaseId={setCaseId}
+          confidentiality={confidentiality}
+          setConfidentiality={setConfidentiality}
+          remarks={remarks}
+          setRemarks={setRemarks}
+          uploadState={uploadState}
+          itemVariants={itemVariants}
+        />
+
+        <SecurityProtocolPanel 
+          uploadState={uploadState} 
+          itemVariants={itemVariants} 
+        />
       </div>
-
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Upload Document</h1>
-        <p className="text-slate-400 mt-1">Submit new evidence or documentation for secure processing and hashing.</p>
-      </div>
-
-      <form className="bg-slate-900 border border-slate-800 rounded-lg p-8 space-y-8 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Document Title</label>
-            <input 
-              type="text" 
-              placeholder="e.g. Server Audit Log"
-              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Document Type</label>
-            <select className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-              <option value="">Select type...</option>
-              <option value="log">Log File</option>
-              <option value="report">Report (PDF)</option>
-              <option value="media">Media / Video</option>
-              <option value="transcript">Transcript</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Associated Case (Optional)</label>
-            <select className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-              <option value="">Select a case...</option>
-              <option value="CASE-0092">CASE-0092: Operation Northern Light</option>
-              <option value="CASE-0091">CASE-0091: Cybercom Audit Q3</option>
-              <option value="CASE-0089">CASE-0089: Vendor Risk Assessment</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Confidentiality Level</label>
-            <select className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-              <option value="unclassified">Unclassified</option>
-              <option value="confidential">Confidential</option>
-              <option value="secret">Secret</option>
-              <option value="top_secret">Top Secret</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-300">File Upload</label>
-          <div 
-            className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-6 py-10 transition-colors ${
-              isDragging ? "border-blue-500 bg-blue-900/20" : "border-slate-700 bg-slate-950/50"
-            }`}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                setFile(e.dataTransfer.files[0]);
-              }
-            }}
-          >
-            <div className="text-center">
-              <span className="mx-auto flex h-12 w-12 items-center justify-center text-4xl mb-4">
-                {file ? "📄" : "📥"}
-              </span>
-              <div className="mt-4 flex text-sm leading-6 text-slate-400 justify-center">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer rounded-md font-semibold text-blue-500 focus-within:outline-none hover:text-blue-400"
-                >
-                  <span>Upload a file</span>
-                  <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs leading-5 text-slate-500 mt-2">
-                {file ? `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)` : "Any file up to 50MB"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-300">Remarks / Chain of Custody Note</label>
-          <textarea 
-            rows={4}
-            placeholder="Provide any additional context or remarks about this document's acquisition..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          ></textarea>
-        </div>
-
-        <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
-          <Link href="/documents" className="px-6 py-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white transition-colors">
-            Cancel
-          </Link>
-          <button type="button" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-md text-sm font-medium transition-colors shadow-sm">
-            Secure Upload & Hash
-          </button>
-        </div>
-      </form>
-    </div>
+    </motion.div>
   );
 }

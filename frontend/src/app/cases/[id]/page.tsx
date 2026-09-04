@@ -1,60 +1,134 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import api from "@/services/api";
+import { CaseDetailHeader } from "@/components/cases/CaseDetailHeader";
+import { CaseDetailOverview } from "@/components/cases/CaseDetailOverview";
 
 export default function CaseDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState("Overview");
+  const tabs = ["Overview", "Documents", "Timeline"];
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [reportGenerated, setReportGenerated] = useState(false);
+  const [caseData, setCaseData] = useState<any>(null);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const tabs = ["Overview", "Documents", "Evidence", "Timeline"];
+  useEffect(() => {
+    const fetchCaseDetails = async () => {
+      try {
+        const [caseRes, docRes, auditRes] = await Promise.all([
+          api.get(`/cases/${params.id}/`),
+          api.get(`/documents/?case=${params.id}`),
+          api.get(`/audit-logs/?resource_id=${params.id}`)
+        ]);
+        setCaseData(caseRes.data);
+        // Sometimes backend filters aren't perfect in dummy setups, filter manually just in case
+        setDocuments(docRes.data.filter((d: any) => d.case === parseInt(params.id) || d.case?.id === parseInt(params.id)));
+        setTimeline(auditRes.data.filter((l: any) => l.resource_type === 'Case' && l.resource_id === params.id));
+      } catch (err) {
+        console.error("Failed to fetch case details", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCaseDetails();
+  }, [params.id]);
+
+  const handleGenerateReport = async () => {
+    setIsGenerating(true);
+    await new Promise(res => setTimeout(res, 800)); // Simulating generation time
+    setIsGenerating(false);
+    setReportGenerated(true);
+    
+    // Trigger mock download
+    const blob = new Blob([`CONFIDENTIAL CASE REPORT: ${caseData.case_number}\n\nTitle: ${caseData.title}\nStatus: ${caseData.status}`], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${caseData.case_number}_Report.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setTimeout(() => setReportGenerated(false), 3000);
+  };
+
+  const updateCaseStatus = async (newStatus: string) => {
+    try {
+      const res = await api.patch(`/cases/${params.id}/`, { status: newStatus });
+      setCaseData(res.data);
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
+  };
+
+  const handleDeleteCase = async () => {
+    if (window.confirm("CRITICAL WARNING: Are you sure you want to permanently delete this entire Case? This will permanently delete all attached documents, FIRs, and the entire evidence chain associated with it!")) {
+      try {
+        await api.delete(`/cases/${params.id}/`);
+        window.location.href = '/cases';
+      } catch (err) {
+        console.error("Failed to delete case", err);
+        alert("Failed to delete case. You may not have sufficient permissions.");
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        <p className="text-content-muted font-mono tracking-[0.2em] text-[10px] uppercase">Loading Case Data</p>
+      </div>
+    );
+  }
+
+  if (!caseData) {
+    return <div className="text-center text-status-danger p-8">Case not found.</div>;
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
-        <Link href="/cases" className="hover:text-white transition-colors">Cases</Link>
-        <span>/</span>
-        <span className="text-slate-200">{params.id}</span>
+    <div className="space-y-6 max-w-[1600px] mx-auto animate-fade-in-up">
+      <div className="flex items-center gap-2 text-xs font-mono text-content-muted mb-4 uppercase tracking-[0.2em]">
+        <Link href="/cases" className="hover:text-accent transition-colors">Cases</Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-content-primary">{caseData.case_number}</span>
       </div>
 
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-white tracking-tight">{params.id}</h1>
-            <span className="bg-red-900/50 text-red-400 px-2 py-0.5 rounded text-xs font-bold border border-red-800">
-              TOP SECRET
-            </span>
-            <span className="bg-emerald-900/30 text-emerald-400 px-2.5 py-0.5 rounded-full text-xs font-medium border border-emerald-800">
-              Active
-            </span>
-          </div>
-          <p className="text-slate-400 mt-2 text-lg">Operation Northern Light</p>
-        </div>
-        <div className="flex gap-2">
-          <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors border border-slate-700">
-            Edit Case
-          </button>
-          <button 
-            onClick={() => alert("Report generation initiated. You will be notified when it's ready.")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            Generate Report
-          </button>
-        </div>
-      </div>
+      <CaseDetailHeader 
+        caseData={caseData}
+        isGenerating={isGenerating}
+        reportGenerated={reportGenerated}
+        onGenerateReport={handleGenerateReport}
+        onStatusChange={updateCaseStatus}
+        onDeleteCase={handleDeleteCase}
+      />
 
-      <div className="border-b border-slate-800">
-        <nav className="flex space-x-8">
+      <div className="border-b border-border overflow-x-auto scrollbar-none relative">
+        <nav className="flex space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`relative py-4 px-1 text-[10px] font-bold tracking-[0.2em] uppercase transition-colors flex items-center gap-2 group ${
                 activeTab === tab
-                  ? "border-blue-500 text-blue-400"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                  ? "text-accent"
+                  : "text-content-muted hover:text-content-secondary"
               }`}
             >
               {tab}
+              {activeTab === tab && (
+                <motion.div 
+                  layoutId="active-tab-indicator"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent"
+                  initial={false}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                />
+              )}
             </button>
           ))}
         </nav>
@@ -62,77 +136,42 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
 
       <div className="py-4">
         {activeTab === "Overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Case Summary</h3>
-                <p className="text-slate-300 leading-relaxed text-sm">
-                  Operation Northern Light focuses on the investigation of unauthorized access attempts originating from advanced persistent threat (APT) actors targeting critical infrastructure sub-networks. Initial detection occurred on Oct 12, 2023. Currently gathering telemetry and isolating affected nodes.
-                </p>
-              </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Personnel</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-blue-900 flex items-center justify-center text-blue-400 font-bold text-xs">SA</div>
-                      <span className="text-slate-200">Special Agent Smith</span>
-                    </div>
-                    <span className="text-slate-500">Lead Investigator</span>
-                  </li>
-                  <li className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-purple-900 flex items-center justify-center text-purple-400 font-bold text-xs">JD</div>
-                      <span className="text-slate-200">Jane Doe</span>
-                    </div>
-                    <span className="text-slate-500">Cyber Analyst</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="space-y-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Metadata</h3>
-                <dl className="space-y-4 text-sm">
-                  <div>
-                    <dt className="text-slate-500 font-medium">Opened Date</dt>
-                    <dd className="text-slate-200 mt-1">October 12, 2023</dd>
-                  </div>
-                  <div>
-                    <dt className="text-slate-500 font-medium">Primary Agency</dt>
-                    <dd className="text-slate-200 mt-1">CISA</dd>
-                  </div>
-                  <div>
-                    <dt className="text-slate-500 font-medium">Reference IDs</dt>
-                    <dd className="text-slate-200 mt-1 font-mono text-xs">REF-2023-A91B</dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </div>
+          <CaseDetailOverview caseData={caseData} />
         )}
-
         {activeTab === "Documents" && (
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center py-12">
-            <span className="text-4xl">📄</span>
-            <h3 className="text-lg font-medium text-white mt-4">No documents yet</h3>
-            <p className="text-slate-400 text-sm mt-1 mb-4">Upload documents related to this case to track them securely.</p>
-            <Link href="/documents/upload" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-block">
-              Upload Document
-            </Link>
+          <div className="bg-surface border border-border p-6 rounded">
+            <h3 className="text-sm font-bold text-content-primary mb-4">Case Documents ({documents.length})</h3>
+            {documents.length > 0 ? (
+              <ul className="space-y-2">
+                {documents.map((doc: any) => (
+                  <li key={doc.id} className="text-xs text-content-secondary border border-border/50 p-2 rounded">
+                    <Link href={`/documents/${doc.id}`} className="hover:text-accent hover:underline">
+                      {doc.title} ({doc.document_id})
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-content-muted">No documents attached to this case.</p>
+            )}
           </div>
         )}
-        
-        {activeTab === "Evidence" && (
-           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center py-12 text-slate-400">
-             Evidence module tracking loaded. No items to display.
-           </div>
-        )}
-
         {activeTab === "Timeline" && (
-           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center py-12 text-slate-400">
-             Timeline module loaded. No events recorded.
-           </div>
+          <div className="bg-surface border border-border p-6 rounded">
+            <h3 className="text-sm font-bold text-content-primary mb-4">Case Timeline</h3>
+            {timeline.length > 0 ? (
+              <ul className="space-y-4">
+                {timeline.map((log: any) => (
+                  <li key={log.id} className="text-xs text-content-secondary border-l-2 border-accent pl-4 py-1">
+                    <p className="font-bold text-content-primary">{log.action}</p>
+                    <p className="text-content-muted mt-1">{new Date(log.timestamp).toLocaleString()} by {log.actor?.username}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-content-muted">No timeline events found.</p>
+            )}
+          </div>
         )}
       </div>
     </div>

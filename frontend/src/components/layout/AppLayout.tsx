@@ -1,47 +1,112 @@
 "use client";
 
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
+  const isLegal = user?.role === 'LEGAL_OFFICER' || user?.username === '26010003' || user?.username?.includes('legal');
+  const isForensic = user?.role === 'FORENSIC_OFFICER' || user?.username === '26010002' || user?.username?.includes('forensic');
+  
+  const bgImage = isLegal ? "url('/bg-legal.jpg')" : 
+                  isForensic ? "url('/bg-forensic.jpg')" : 
+                  "url('/bg-inspector.jpg')";
+  
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated && pathname !== "/login") {
-        router.push("/login");
-      } else if (isAuthenticated && pathname === "/login") {
-        router.push("/dashboard");
-      }
+    if (isLegal) {
+      document.body.classList.add('theme-legal');
+    } else {
+      document.body.classList.remove('theme-legal');
+    }
+  }, [isLegal]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && pathname !== "/login") {
+      router.push("/login");
     }
   }, [isAuthenticated, isLoading, pathname, router]);
 
-  if (pathname === "/login") {
-    return <>{children}</>;
-  }
-
   if (isLoading) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-content-muted font-mono tracking-[0.2em] text-xs uppercase">Initializing System</p>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Redirecting to login...</div>;
+    if (pathname === "/login") {
+      return (
+        <div className="relative min-h-screen bg-background">
+          <div className="relative z-10 min-h-screen">
+            {children}
+          </div>
+        </div>
+      );
+    }
+    return <div className="min-h-screen bg-background flex items-center justify-center text-content-primary">Redirecting...</div>;
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden text-foreground">
+    <div className="flex h-screen bg-background overflow-hidden relative">
+      {mounted && resolvedTheme === 'dark' ? (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat fixed"
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            style={{ backgroundImage: bgImage, mixBlendMode: 'screen' }}
+          ></motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background opacity-90"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-80"></div>
+        </div>
+      ) : mounted ? (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat fixed"
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.12 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            style={{ backgroundImage: bgImage, mixBlendMode: 'multiply' }}
+          ></motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background opacity-90"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-60"></div>
+        </div>
+      ) : (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-background"></div>
+      )}
+      
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6 scroll-smooth bg-muted/20">
-          {children}
-        </main>
+        
+        {/* Page content with smooth spatial transitions */}
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={pathname}
+            initial={{ opacity: 0, y: 8, scale: 0.995 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.995 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }}
+            className="flex-1 overflow-y-auto p-8 scroll-smooth"
+          >
+            {children}
+          </motion.main>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -49,10 +114,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <LayoutContent>{children}</LayoutContent>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </AuthProvider>
   );
 }

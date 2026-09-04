@@ -1,159 +1,184 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
+import Link from "next/link";
+import api from "@/services/api";
+import { motion } from "framer-motion";
+import { 
+  Briefcase, FileText, CheckCircle, TestTube, ShieldCheck,
+  AlertOctagon, Activity, ChevronRight, Lock, Database,
+  Hexagon, PenTool, Plus, Upload, Search, ClipboardCheck
+} from "lucide-react";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
+import ActiveCasesTable from "@/components/dashboard/ActiveCasesTable";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
     casesCount: 0,
     documentsCount: 0,
-    alertsCount: 0
+    verifiedCount: 0,
+    pendingCount: 0,
+    alertsCount: 0,
+    evidenceCount: 0
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [showAllActivity, setShowAllActivity] = useState(false);
+  const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [casesRes, docsRes, auditRes] = await Promise.all([
+        const [casesRes, docsRes, auditRes, evdRes] = await Promise.all([
           api.get('/cases/'),
           api.get('/documents/'),
-          api.get('/audit-logs/')
+          api.get('/audit-logs/'),
+          api.get('/evidence/').catch(() => ({ data: [] }))
         ]);
+        
+        setCases(casesRes.data.slice(0, 5));
         
         setStats({
           casesCount: casesRes.data.length,
           documentsCount: docsRes.data.length,
-          alertsCount: auditRes.data.filter((l: any) => l.severity === 'HIGH').length
+          verifiedCount: docsRes.data.filter((d: any) => d.status === 'ACTIVE' || d.status === 'VERIFIED').length,
+          pendingCount: docsRes.data.filter((d: any) => d.status !== 'ACTIVE' && d.status !== 'VERIFIED').length,
+          alertsCount: auditRes.data.filter((l: any) => l.severity === 'HIGH').length,
+          evidenceCount: evdRes.data.length
         });
         
-        // Store all recent audit logs for activity, plus some rich dummy data
-        const fetchedLogs = auditRes.data.map((log: any) => ({
+        setRecentActivity(auditRes.data.slice(0, 6).map((log: any) => ({
           id: log.id,
+          actor: log.actor?.username || "System",
           action: log.action,
-          target: log.resource_id || "System",
+          target: log.resource_type ? `${log.resource_type} ${log.resource_id}` : (log.resource_id || "System"),
           time: new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          type: log.severity === 'HIGH' ? 'warning' : 'info'
-        }));
-
-        // Mock data to ensure the list has enough items to demonstrate the View More/Less toggle
-        const mockLogs = [
-          { id: "mock-1", action: "User Login", target: "System Access via IP 192.168.1.42", time: "10:23 AM", type: "info" },
-          { id: "mock-2", action: "Document Downloaded", target: "FIR-2026-00482_Report.pdf", time: "11:45 AM", type: "info" },
-          { id: "mock-3", action: "Unauthorized Access Attempt", target: "Restricted Case File FIR-2026-00712", time: "01:12 PM", type: "warning" },
-          { id: "mock-4", action: "Case Status Updated", target: "FIR-2026-00631 (Status: CLOSED)", time: "02:30 PM", type: "success" },
-          { id: "mock-5", action: "Evidence Uploaded", target: "CCTV_Footage_Camera_4.mp4", time: "04:15 PM", type: "info" },
-          { id: "mock-6", action: "Settings Changed", target: "Two-Factor Authentication Enabled", time: "05:00 PM", type: "success" },
-          { id: "mock-7", action: "Report Generated", target: "Monthly Crime Statistics (PDF)", time: "08:15 AM", type: "info" },
-          { id: "mock-8", action: "API Integration Sync", target: "NCRB Database Synchronized", time: "09:00 AM", type: "success" },
-          { id: "mock-9", action: "Failed Login Attempt", target: "Unknown IP 45.33.22.11", time: "09:45 AM", type: "warning" },
-          { id: "mock-10", action: "Evidence Uploaded", target: "Forensic_Analysis_Report_FSL-03.pdf", time: "11:10 AM", type: "info" },
-          { id: "mock-11", action: "User Role Escalation", target: "Requested by Admin for Inspector Sharma", time: "12:05 PM", type: "warning" },
-          { id: "mock-12", action: "Database Backup", target: "Encrypted Backup Completed Automatically", time: "01:00 AM", type: "success" }
-        ];
-
-        setRecentActivity([...fetchedLogs, ...mockLogs]);
+          date: new Date(log.timestamp).toLocaleDateString(),
+          severity: log.severity
+        })));
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
       } finally {
         setLoading(false);
       }
     };
-    
     fetchDashboardData();
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-400">Loading dashboard...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        <p className="text-content-muted font-mono tracking-[0.2em] text-[10px] uppercase">Initializing Command Center</p>
+      </div>
+    );
   }
 
+  const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+  const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end">
+    <motion.div className="space-y-10 max-w-[1600px]" variants={stagger} initial="hidden" animate="show">
+      
+      {/* Header */}
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Overview of system operations and recent activities.</p>
+          <h1 className="text-3xl font-bold text-content-primary tracking-tight">Command Center</h1>
+          <p className="text-content-muted text-sm mt-1">Real-time overview of investigation, document and security operations.</p>
         </div>
-      </div>
+        <div className="text-[10px] font-mono text-content-muted tracking-widest uppercase bg-surface border border-border rounded px-3 py-1.5">
+          {new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
+        </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Cases</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2">{stats.casesCount}</h3>
-            </div>
-            <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary text-xl">
-              📁
-            </div>
-          </div>
+      {/* KPI Row */}
+      <DashboardStats stats={stats} />
+
+      {/* Quick Actions */}
+      <motion.div variants={fadeUp} className="flex flex-wrap gap-2">
+        {[
+          { label: "New Case", icon: Plus, href: "/cases/new" },
+          { label: "All Cases", icon: Briefcase, href: "/cases" },
+          { label: "Register Evidence", icon: TestTube, href: "/evidence" },
+          { label: "Search", icon: Search, href: "/search" },
+          { label: "Verify Document", icon: CheckCircle, href: "/security" },
+          { label: "View Audit", icon: ClipboardCheck, href: "/audit" },
+        ].map(action => (
+          <Link key={action.label} href={action.href}
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-surface border border-border rounded-lg text-[13px] font-medium text-content-secondary hover:text-content-primary hover:border-border-hover hover:bg-elevated hover:shadow-sm transition-all"
+          >
+            <action.icon className="w-4 h-4" />
+            {action.label}
+          </Link>
+        ))}
+      </motion.div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        {/* Active Investigations + Recent Activity */}
+        <div className="xl:col-span-8 space-y-10">
+          
+          {/* Active Investigations */}
+          <ActiveCasesTable cases={cases} />
+
+          {/* Recent Activity */}
+          <RecentActivityFeed recentActivity={recentActivity} />
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Verified Documents</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2">{stats.documentsCount}</h3>
+        {/* Right Column: Security + System Status */}
+        <div className="xl:col-span-4 space-y-8">
+          
+          {/* Security Status */}
+          <motion.div variants={fadeUp} className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+            <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 mb-6">
+              <ShieldCheck className="w-4 h-4 text-status-verification" /> System Security
+            </h2>
+            <div className="space-y-4">
+              {[
+                { label: "Authentication", status: "Operational", icon: Lock, ok: true },
+                { label: "Document Encryption", status: "Operational", icon: ShieldCheck, ok: true },
+                { label: "Integrity Verification", status: "Operational", icon: CheckCircle, ok: true },
+                { label: "Audit Logging", status: "Operational", icon: Activity, ok: true },
+                { label: "Blockchain Integrity", status: "Pending Integration", icon: Hexagon, ok: false },
+              ].map(item => (
+                <div key={item.label} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0 group">
+                  <div className="flex items-center gap-3">
+                    <item.icon className="w-4 h-4 text-content-muted" />
+                    <span className="text-sm font-medium text-content-secondary">{item.label}</span>
+                  </div>
+                  <span className={`text-[10px] font-bold tracking-[0.1em] uppercase px-2 py-1 rounded bg-elevated ${
+                    item.ok ? 'text-status-verification' : 'text-status-warning'
+                  }`}>
+                    {item.status}
+                  </span>
+                </div>
+              ))}
             </div>
-            <div className="h-10 w-10 bg-purple-500/10 rounded-full flex items-center justify-center text-purple-500 text-xl">
-              📄
-            </div>
-          </div>
-        </div>
+          </motion.div>
 
-        <div className="bg-card border border-destructive/30 rounded-xl p-6 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5 text-destructive text-6xl">🛡️</div>
-          <div className="relative z-10 flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Security Alerts</p>
-              <h3 className="text-3xl font-bold text-destructive mt-2">{stats.alertsCount}</h3>
-            </div>
-            <div className="h-10 w-10 bg-destructive/10 rounded-full flex items-center justify-center text-destructive text-xl">
-              🚨
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-border bg-muted/20">
-          <h3 className="font-semibold text-foreground">Recent Activity</h3>
-        </div>
-        <div className="divide-y divide-border">
-          {recentActivity.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">No recent activity.</div>
-          ) : (showAllActivity ? recentActivity : recentActivity.slice(0, 3)).map((activity) => (
-            <div key={activity.id} className="px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className={`h-2 w-2 rounded-full shadow-sm ${
-                  activity.type === 'success' ? 'bg-emerald-500 shadow-emerald-500/50' :
-                  activity.type === 'warning' ? 'bg-destructive shadow-destructive/50' : 'bg-primary shadow-primary/50'
-                }`} />
-                <div>
-                  <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{activity.target}</p>
+          {/* Quick Stats */}
+          <motion.div variants={fadeUp}>
+            <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase mb-4">
+              Data Integrity
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-end mb-1.5">
+                  <span className="text-xs text-content-secondary">Document Integrity</span>
+                  <span className="text-[10px] font-mono text-status-verification font-bold">
+                    {stats.documentsCount > 0 ? Math.round((stats.verifiedCount / stats.documentsCount) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="w-full bg-background rounded-full h-1">
+                  <div
+                    className="bg-status-verification h-1 rounded-full transition-all duration-700"
+                    style={{ width: `${stats.documentsCount > 0 ? (stats.verifiedCount / stats.documentsCount) * 100 : 0}%` }}
+                  />
                 </div>
               </div>
-              <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">{activity.time}</span>
             </div>
-          ))}
-        </div>
-        <div className="px-6 py-3 border-t border-border bg-muted/10 text-center">
-          {recentActivity.length > 3 && (
-            <button 
-              onClick={() => setShowAllActivity(!showAllActivity)}
-              className="text-sm text-primary hover:text-primary/80 font-semibold transition-colors flex items-center justify-center gap-1 mx-auto"
-            >
-              {showAllActivity ? (
-                <>Show Less <span className="text-xs">▲</span></>
-              ) : (
-                <>View All Activity <span className="text-xs">▼</span></>
-              )}
-            </button>
-          )}
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

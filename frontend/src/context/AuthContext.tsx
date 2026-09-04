@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import api from "@/lib/api";
+import api from "@/services/api";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
@@ -12,7 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   isInvestigator: boolean;
   isLawyer: boolean;
-  updateUser: (newUserData: any) => void;
+  isForensic: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,15 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isInvestigator = user?.role === 'INVESTIGATING_OFFICER' || user?.role === 'SUPER_ADMIN';
   const isLawyer = user?.role === 'LEGAL_OFFICER' || user?.role === 'SUPER_ADMIN';
-
-  const updateUser = (newUserData: any) => {
-    const updatedUser = { ...user, ...newUserData };
-    sessionStorage.setItem("user", JSON.stringify(updatedUser));
-    setUser(updatedUser);
-  };
+  const isForensic = user?.role === 'FORENSIC_EXPERT' || user?.role === 'SUPER_ADMIN';
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading, isInvestigator, isLawyer, updateUser }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading, isInvestigator, isLawyer, isForensic }}>
       {children}
     </AuthContext.Provider>
   );
