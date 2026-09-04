@@ -30,6 +30,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploader = UserSerializer(source="uploaded_by", read_only=True)
+    verifier = UserSerializer(source="verified_by", read_only=True)
+    deleter = UserSerializer(source="deleted_by", read_only=True)
+    flagger = UserSerializer(source="flagged_by", read_only=True)
     class Meta:
         model = Document
         fields = '__all__'
@@ -37,10 +40,16 @@ class DocumentSerializer(serializers.ModelSerializer):
 class CaseSerializer(serializers.ModelSerializer):
     investigating_officer = UserSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
-    documents = DocumentSerializer(many=True, read_only=True)
+    documents = serializers.SerializerMethodField()
+    case_number = serializers.CharField(read_only=True)
     class Meta:
         model = Case
         fields = '__all__'
+
+    def get_documents(self, obj):
+        # Exclude deleted documents when retrieving case details
+        docs = obj.documents.exclude(status='DELETED')
+        return DocumentSerializer(docs, many=True).data
 
 class DocumentVersionSerializer(serializers.ModelSerializer):
     class Meta:

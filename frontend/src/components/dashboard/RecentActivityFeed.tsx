@@ -37,8 +37,8 @@ export default function RecentActivityFeed({ recentActivity }: RecentActivityFee
               <div key={event.id} className="flex items-start gap-4 px-4 py-3 rounded-lg hover:bg-elevated transition-colors group border border-transparent hover:border-border/50">
                 <div className="shrink-0 mt-1">
                   <div className={`w-2 h-2 rounded-full ${
-                    event.severity === 'HIGH' ? 'bg-status-critical' : 'bg-status-verification'
-                  } ring-4 ${event.severity === 'HIGH' ? 'ring-status-critical/10' : 'ring-status-verification/10'}`} />
+                    event.severity === 'HIGH' ? 'bg-status-danger' : 'bg-status-verification'
+                  } ring-4 ${event.severity === 'HIGH' ? 'ring-status-danger/10' : 'ring-status-verification/10'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

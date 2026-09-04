@@ -9,6 +9,7 @@ router.register(r'cases', CaseViewSet)
 router.register(r'documents', DocumentViewSet)
 router.register(r'audit-logs', AuditLogViewSet)
 router.register(r'blockchain', BlockchainRecordViewSet)
+router.register(r'evidence', EvidenceChainViewSet)
 
 urlpatterns = [
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),

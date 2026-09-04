@@ -45,15 +45,21 @@ When you click "Upload Document":
 **Answer:** Traditional search only looks for exact word matches. Our semantic search uses a Sentence Transformer model to convert both the documents and the search query into high-dimensional mathematical vectors (embeddings). We then calculate the "Cosine Similarity" between these vectors. This means the system understands the *meaning* of the words. If you search for "financial fraud", it can find a document about "bank embezzlement" even if the exact words "financial fraud" aren't in the file.
 
 **Q3: How do you ensure the integrity of the uploaded documents?**
-**Answer:** (For the mock setup) When a document is uploaded, we calculate its true SHA-256 hash. We also maintain a strict, immutable Audit Trail in the database that logs exactly who uploaded the document, when, and its hash. Any modifications to the document would change its hash, immediately flagging it as tampered.
+**Answer:** When a document is uploaded, we immediately calculate its true **SHA-256 cryptographic hash**. This hash acts as a unique digital fingerprint. If even a single comma is changed in the file, the hash changes completely. Authorized officers (like Legal Officers) verify the document against its hash. If a tampered file is ever presented, the system detects the hash mismatch and flags it as compromised.
 
-**Q4: How does your Role-Based Access Control (RBAC) work?**
+**Q4: Can you explain the Blockchain integration in your project?**
+**Answer:** We implemented a simulated **Hyperledger Fabric** blockchain trace. In a production environment for legal evidence, a traditional database isn't enough because database admins could theoretically alter records. By logging every transaction (uploads, verifications) to an immutable blockchain ledger, we create a decentralized, tamper-proof chain of custody. No single entity can alter the history of an evidence file without invalidating the cryptographic chain.
+
+**Q5: What happens if a malicious user tries to delete a critical piece of evidence?**
+**Answer:** First, the system utilizes strict Role-Based Access Control (RBAC). Only high-level Administrators can authorize a deletion. Second, even when an Admin deletes a file, we utilize a **Secure Soft-Delete (Recycle Bin)** mechanism. The file is never truly wiped from the system; it is moved to a restricted state. Most importantly, the entire chain of custody and audit trail remains completely intact. An immutable `FILE_DELETED` event is logged, retaining the full history of the document so nothing can disappear without a trace.
+
+**Q6: How does your Role-Based Access Control (RBAC) work?**
 **Answer:** Users are assigned specific roles (e.g., INVESTIGATOR, LEGAL_OFFICER, SUPER_ADMIN). The frontend uses React Context to conditionally hide buttons (like restricting uploads to investigators only). More importantly, the backend enforces this at the API level using Django permission classes, ensuring that even if someone bypasses the UI, they cannot execute unauthorized actions on the server.
 
-**Q5: What happens if the AI Microservice crashes? Does the whole app go down?**
+**Q7: What happens if the AI Microservice crashes? Does the whole app go down?**
 **Answer:** No. Because of our microservice architecture, the core Django backend will continue to function perfectly. Users can still log in, view cases, upload documents, and check the audit trail. Only the AI-specific features (semantic search and summarization) will be temporarily disabled until the microservice is restored.
 
-**Q6: Where is the AI data stored?**
+**Q8: Where is the AI data stored?**
 **Answer:** While traditional relational data is in Django's SQLite database, the AI vector embeddings are serialized and saved to disk (`vector_store.pkl`). This ensures that the AI retains its memory across server restarts without requiring a heavy, complex vector database like Pinecone or pgvector for this prototype.
 
 ---

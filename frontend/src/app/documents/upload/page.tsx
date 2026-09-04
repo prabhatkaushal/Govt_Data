@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import api from "@/lib/api";
+import api from "@/services/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Upload } from "lucide-react";
 import { motion } from "framer-motion";
-import DocumentUploadForm from "@/components/features/documents/DocumentUploadForm";
-import SecurityProtocolPanel from "@/components/features/documents/SecurityProtocolPanel";
+import DocumentUploadForm from "@/components/documents/DocumentUploadForm";
+import SecurityProtocolPanel from "@/components/documents/SecurityProtocolPanel";
 import { useAuth } from "@/context/AuthContext";
 
 export default function DocumentUploadPage() {

@@ -9,34 +9,40 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', 'sans-serif'],
-        display: ['var(--font-display)', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+        display: ['var(--font-inter)', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
         background: "var(--background)", 
         surface: "var(--surface)",
         elevated: "var(--elevated)",
-        border: "var(--border)",
-        "border-hover": "var(--border-hover)",
+        sidebar: "var(--sidebar)",
+        border: {
+          DEFAULT: "var(--border)",
+          active: "var(--border-active)",
+          hover: "var(--border-hover)",
+        },
         
         content: {
           primary: "var(--content-primary)",
           secondary: "var(--content-secondary)",
           muted: "var(--content-muted)",
+          disabled: "var(--content-disabled)",
         },
         
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
+          muted: "var(--accent-muted)",
         },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+        
+        status: {
+          success: "var(--status-success)",
+          warning: "var(--status-warning)",
+          danger: "var(--status-danger)",
+          info: "var(--status-info)",
+          verification: "var(--status-verification)",
         },
       },
       borderRadius: {

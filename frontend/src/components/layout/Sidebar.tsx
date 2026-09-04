@@ -64,18 +64,26 @@ export function Sidebar() {
       name: "INTELLIGENCE",
       items: [
         { name: "Global Search", href: "/search", icon: Search },
+        { name: "Reports & Analytics", href: "/reports", icon: BarChart3 },
       ]
     },
     {
       name: "SECURITY & AUDIT",
       items: [
         { name: "Security Center", href: "/security", icon: ShieldCheck },
+        { name: "Global Verify", href: "/verify", icon: ScanText },
         { name: "Audit Trail", href: "/audit", icon: ListOrdered },
       ]
     },
     {
+      name: "SYSTEM",
+      items: [
+        { name: "Settings", href: "/settings", icon: Settings },
+      ]
+    },
+    {
       name: "ADMIN",
-      roles: ["ADMIN", "admin"],
+      roles: ["ADMIN", "admin", "SUPER_ADMIN"],
       items: [
         { name: "Users & Roles", href: "/admin", icon: UserCog },
       ]
@@ -99,7 +107,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-[260px] bg-surface/80 backdrop-blur-md border-r border-border hidden md:flex flex-col h-full shrink-0 relative z-20">
+    <aside id="sidebar" className="w-[260px] bg-surface/80 backdrop-blur-md border-r border-border hidden md:flex flex-col h-full shrink-0 relative z-20">
       {/* Brand */}
       <div className="h-16 flex items-center px-5 border-b border-border shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">

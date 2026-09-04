@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import api from "@/lib/api";
+import api from "@/services/api";
 import { motion } from "framer-motion";
 import { 
   Briefcase, FileText, CheckCircle, TestTube, ShieldCheck,
   AlertOctagon, Activity, ChevronRight, Lock, Database,
   Hexagon, PenTool, Plus, Upload, Search, ClipboardCheck
 } from "lucide-react";
-import DashboardStats from "@/components/features/dashboard/DashboardStats";
-import RecentActivityFeed from "@/components/features/dashboard/RecentActivityFeed";
-import ActiveCasesTable from "@/components/features/dashboard/ActiveCasesTable";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
+import ActiveCasesTable from "@/components/dashboard/ActiveCasesTable";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -19,7 +19,8 @@ export default function DashboardPage() {
     documentsCount: 0,
     verifiedCount: 0,
     pendingCount: 0,
-    alertsCount: 0
+    alertsCount: 0,
+    evidenceCount: 0
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [cases, setCases] = useState<any[]>([]);
@@ -28,10 +29,11 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [casesRes, docsRes, auditRes] = await Promise.all([
+        const [casesRes, docsRes, auditRes, evdRes] = await Promise.all([
           api.get('/cases/'),
           api.get('/documents/'),
-          api.get('/audit-logs/')
+          api.get('/audit-logs/'),
+          api.get('/evidence/').catch(() => ({ data: [] }))
         ]);
         
         setCases(casesRes.data.slice(0, 5));
@@ -41,7 +43,8 @@ export default function DashboardPage() {
           documentsCount: docsRes.data.length,
           verifiedCount: docsRes.data.filter((d: any) => d.status === 'ACTIVE' || d.status === 'VERIFIED').length,
           pendingCount: docsRes.data.filter((d: any) => d.status !== 'ACTIVE' && d.status !== 'VERIFIED').length,
-          alertsCount: auditRes.data.filter((l: any) => l.severity === 'HIGH').length
+          alertsCount: auditRes.data.filter((l: any) => l.severity === 'HIGH').length,
+          evidenceCount: evdRes.data.length
         });
         
         setRecentActivity(auditRes.data.slice(0, 6).map((log: any) => ({
@@ -94,8 +97,8 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <motion.div variants={fadeUp} className="flex flex-wrap gap-2">
         {[
-          { label: "New Case", icon: Plus, href: "/cases" },
-          { label: "Upload Document", icon: Upload, href: "/documents/upload" },
+          { label: "New Case", icon: Plus, href: "/cases/new" },
+          { label: "All Cases", icon: Briefcase, href: "/cases" },
           { label: "Register Evidence", icon: TestTube, href: "/evidence" },
           { label: "Search", icon: Search, href: "/search" },
           { label: "Verify Document", icon: CheckCircle, href: "/security" },

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import DocumentDetailView from "@/components/features/documents/DocumentDetailView";
-import api from "@/lib/api";
+import DocumentDetailView from "@/components/documents/DocumentDetailView";
+import api from "@/services/api";
 
 export default function DocumentDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState("Details");

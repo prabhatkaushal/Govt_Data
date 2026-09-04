@@ -9,6 +9,7 @@ interface Stats {
   verifiedCount: number;
   pendingCount: number;
   alertsCount: number;
+  evidenceCount: number;
 }
 
 interface DashboardStatsProps {
@@ -28,8 +29,8 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
         { label: "Documents", value: stats.documentsCount, icon: FileText, color: "text-content-primary" },
         { label: "Verified", value: stats.verifiedCount, sub: `${stats.documentsCount > 0 ? Math.round((stats.verifiedCount / stats.documentsCount) * 100) : 0}% integrity`, icon: CheckCircle, color: "text-status-verification" },
         { label: "Pending Review", value: stats.pendingCount, icon: ClipboardCheck, color: "text-status-warning" },
-        { label: "Evidence Items", value: "—", sub: "Awaiting backend", icon: TestTube, color: "text-content-muted" },
-        { label: "Security Alerts", value: stats.alertsCount.toString().padStart(2, '0'), sub: stats.alertsCount > 0 ? `${stats.alertsCount} require attention` : "All clear", icon: AlertOctagon, color: stats.alertsCount > 0 ? "text-status-critical" : "text-status-verification" },
+        { label: "Evidence Items", value: stats.evidenceCount, sub: "Registered locally", icon: TestTube, color: "text-content-primary" },
+        { label: "Security Alerts", value: stats.alertsCount.toString().padStart(2, '0'), sub: stats.alertsCount > 0 ? `${stats.alertsCount} require attention` : "All clear", icon: AlertOctagon, color: stats.alertsCount > 0 ? "text-status-danger" : "text-status-verification" },
       ].map((kpi, idx) => (
         <div key={idx} className="bg-surface border border-border rounded-xl p-6 flex flex-col justify-between min-h-[120px] group hover:bg-elevated hover:shadow-sm transition-all hover:border-border-hover">
           <div className="flex items-center justify-between">

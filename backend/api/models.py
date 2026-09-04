@@ -61,6 +61,15 @@ class Case(models.Model):
     def __str__(self):
         return self.case_number
 
+class FIR(models.Model):
+    fir_number = models.CharField(max_length=100, unique=True, db_index=True)
+    case = models.OneToOneField(Case, on_delete=models.CASCADE, related_name="fir_record")
+    document = models.OneToOneField('Document', on_delete=models.CASCADE, related_name="fir_details", null=True, blank=True)
+    registered_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.fir_number
+
 class Document(models.Model):
     document_id = models.CharField(max_length=100, unique=True, db_index=True)
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="documents", null=True, blank=True)
@@ -74,11 +83,23 @@ class Document(models.Model):
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="uploaded_documents")
     confidentiality_level = models.CharField(max_length=50, default="INTERNAL")
     current_version = models.IntegerField(default=1)
-    status = models.CharField(max_length=50, default="ACTIVE")
+    status = models.CharField(max_length=50, default="PENDING_VERIFICATION")
     sha256_hash = models.CharField(max_length=256, db_index=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_accessed_at = models.DateTimeField(blank=True, null=True)
+    
+    # Audit & Lifecycle Tracking
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="deleted_documents")
+    
+    verified_at = models.DateTimeField(blank=True, null=True)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="verified_documents")
+    
+    flagged = models.BooleanField(default=False)
+    flagged_at = models.DateTimeField(blank=True, null=True)
+    flagged_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="flagged_documents")
+    flag_reason = models.TextField(blank=True, null=True)
 
 class DocumentVersion(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="versions")
@@ -102,6 +123,7 @@ class EvidenceChain(models.Model):
     previous_hash = models.CharField(max_length=256, blank=True, null=True)
     current_hash = models.CharField(max_length=256, blank=True, null=True)
     blockchain_tx_id = models.CharField(max_length=255, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)
 
 class AuditLog(models.Model):

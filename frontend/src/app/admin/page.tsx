@@ -41,9 +41,9 @@ export default function AdminPage() {
               </p>
             </div>
           </div>
-          <div className="px-4 py-2 bg-status-critical/10 border border-status-critical/20 rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-status-critical" />
-            <span className="text-xs font-mono text-status-critical">REQUIRES BACKEND ADMIN API</span>
+          <div className="px-4 py-2 bg-status-danger/10 border border-status-danger/20 rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-status-danger" />
+            <span className="text-xs font-mono text-status-danger">REQUIRES BACKEND ADMIN API</span>
           </div>
         </motion.div>
 

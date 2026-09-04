@@ -9,7 +9,7 @@ export interface Case {
   confidentiality_level: string;
   created_at: string;
   updated_at?: string;
-  lead_investigator?: any;
+  investigating_officer?: any;
 }
 
 interface CaseListTableProps {
@@ -64,7 +64,7 @@ export function CaseListTable({ cases, loading }: CaseListTableProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center text-[10px] font-bold tracking-[0.2em] uppercase ${
-                      c.confidentiality_level === 'TOP_SECRET' ? 'text-status-critical' :
+                      c.confidentiality_level === 'TOP_SECRET' ? 'text-status-danger' :
                       c.confidentiality_level === 'CONFIDENTIAL' ? 'text-accent' :
                       'text-content-muted'
                     }`}>
@@ -72,7 +72,7 @@ export function CaseListTable({ cases, loading }: CaseListTableProps) {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-content-secondary tracking-wide">
-                    {c.lead_investigator?.username || 'Unassigned'}
+                    {c.investigating_officer?.full_name || c.investigating_officer?.username || 'Unassigned'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="inline-flex items-center justify-center p-1.5 rounded text-content-muted group-hover:text-accent group-hover:bg-accent/10 transition-all">

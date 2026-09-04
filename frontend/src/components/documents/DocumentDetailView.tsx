@@ -123,17 +123,68 @@ export default function DocumentDetailView({
             <div className="xl:col-span-4 space-y-6">
               <div className="bg-surface/30 border border-border/50 rounded p-6">
                  <h3 className="text-[10px] font-bold text-content-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                   <Lock className="w-3.5 h-3.5 text-accent" /> Digital Signature
+                   <Lock className="w-3.5 h-3.5 text-accent" /> Security & Integrity
                  </h3>
                  <dl className="space-y-4">
                    <div>
-                     <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">SHA-256 Hash</dt>
-                     <dd className="text-content-primary font-mono text-xs mt-1 truncate">8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4</dd>
+                     <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Status</dt>
+                     <dd className="mt-1">
+                       {docData?.status === 'DELETED' ? (
+                         <span className="text-status-danger font-bold text-xs uppercase tracking-widest flex items-center gap-1">
+                           <Activity className="w-3.5 h-3.5" /> Deleted — Awaiting Restoration
+                         </span>
+                       ) : docData?.flagged ? (
+                         <span className="text-status-warning font-bold text-xs uppercase tracking-widest flex items-center gap-1">
+                           <Activity className="w-3.5 h-3.5" /> Flagged / Suspicious
+                         </span>
+                       ) : docData?.status === 'VERIFIED' ? (
+                         <span className="text-status-verification font-bold text-xs uppercase tracking-widest flex items-center gap-1">
+                           <ShieldCheck className="w-3.5 h-3.5" /> Integrity Verified
+                         </span>
+                       ) : (
+                         <span className="text-content-secondary font-bold text-xs uppercase tracking-widest flex items-center gap-1">
+                           Verification Pending
+                         </span>
+                       )}
+                     </dd>
                    </div>
+                   
                    <div>
-                     <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Signed By</dt>
-                     <dd className="text-content-primary font-mono text-sm mt-1">26010001</dd>
+                     <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">SHA-256 Hash</dt>
+                     <dd className="text-content-primary font-mono text-xs mt-1 truncate" title={docData?.sha256_hash}>
+                       {docData?.sha256_hash || 'N/A'}
+                     </dd>
                    </div>
+                   
+                   {docData?.verifier && (
+                     <>
+                       <div>
+                         <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Verified By</dt>
+                         <dd className="text-content-primary font-mono text-sm mt-1">{docData.verifier.username}</dd>
+                       </div>
+                       {docData.verified_at && (
+                         <div>
+                           <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Verified On</dt>
+                           <dd className="text-content-primary font-mono text-xs mt-1">{new Date(docData.verified_at).toLocaleString()}</dd>
+                         </div>
+                       )}
+                     </>
+                   )}
+                   
+                   {docData?.flagged && docData?.flagger && (
+                     <>
+                       <div>
+                         <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Flagged By</dt>
+                         <dd className="text-status-warning font-mono text-sm mt-1">{docData.flagger.username}</dd>
+                       </div>
+                       {docData.flag_reason && (
+                         <div>
+                           <dt className="text-content-muted font-bold text-[10px] uppercase tracking-widest">Reason</dt>
+                           <dd className="text-content-primary text-xs mt-1">{docData.flag_reason}</dd>
+                         </div>
+                       )}
+                     </>
+                   )}
                  </dl>
               </div>
 

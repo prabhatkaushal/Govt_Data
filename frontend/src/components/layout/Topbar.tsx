@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Search, Bell, LogOut, CheckCircle, X, Moon, Sun } from "lucide-react";
+import { Search, Bell, LogOut, CheckCircle, X, Moon, Sun, Menu } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +22,10 @@ export function Topbar() {
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
+  
+  const toggleMobileMenu = () => {
+    document.body.classList.toggle('mobile-sidebar-open');
   };
   
   // Derive section title from pathname
@@ -71,6 +75,9 @@ export function Topbar() {
     <header className="h-14 bg-background/70 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 sticky top-0 z-50 shrink-0">
       {/* LEFT: Section Title */}
       <div className="flex items-center gap-3 min-w-0 shrink-0">
+        <button className="md:hidden text-content-muted hover:text-content-primary p-1" onClick={toggleMobileMenu}>
+          <Menu className="w-5 h-5" />
+        </button>
         <span className="text-[10px] font-bold text-content-muted tracking-[0.15em] uppercase hidden sm:block">
           {pageTitle}
         </span>
@@ -192,7 +199,7 @@ export function Topbar() {
           </div>
           <button 
             onClick={logout}
-            className="text-content-muted hover:text-status-critical transition-colors p-1"
+            className="text-content-muted hover:text-status-danger transition-colors p-1"
             title="Secure Logout"
             aria-label="Logout"
           >

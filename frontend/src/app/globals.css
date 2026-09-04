@@ -50,9 +50,8 @@
     --content-primary: #382A1B;
     --content-secondary: #6B5B4C;
     --content-muted: #9E8E7D;
-    --accent: #B8860B;
-    --accent-hover: #8B6508;
-    --accent-muted: rgba(184, 134, 11, 0.1);
+    --accent: 210 100% 60%;
+    --accent-hover: 210 100% 70%;
   }
 
   .dark .theme-legal {
@@ -134,4 +133,14 @@ input:focus, select:focus, textarea:focus, button:focus {
 /* Redefine shadow utility for a soft minimalist feel on cards */
 .shadow-premium {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+body.mobile-sidebar-open aside#sidebar {
+  display: flex !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  background-color: var(--surface);
 }

@@ -91,7 +91,37 @@ class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all()
     serializer_class = CaseSerializer
     permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
-    http_method_names = ['get', 'post', 'head', 'options']
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+
+    def perform_create(self, serializer):
+        case_number = f"CASE-{uuid.uuid4().hex[:8].upper()}"
+        serializer.save(
+            case_number=case_number,
+            created_by=self.request.user,
+            department=self.request.user.department
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        # Only Admin or Super Admin can delete cases
+        if request.user.role not in ['ADMIN', 'SUPER_ADMIN']:
+            return Response(
+                {"error": "Only Administrators are authorized to permanently delete cases."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        instance = self.get_object()
+        
+        # Log to Audit Trail BEFORE deletion
+        AuditLog.objects.create(
+            action="DELETE_CASE",
+            actor=request.user,
+            resource_type="CASE",
+            resource_id=instance.case_number,
+            metadata_info={"description": f"Case '{instance.title}' permanently deleted from database by Admin."}
+        )
+        
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
@@ -99,6 +129,93 @@ class DocumentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
     http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
 
+    def get_queryset(self):
+        from django.utils import timezone
+        qs = Document.objects.all()
+        # If explicitly requesting deleted files (Recycle Bin)
+        if self.request.query_params.get('deleted') == 'true':
+            return qs.filter(status='DELETED')
+        # Allow retrieving specific deleted object for restore action
+        if self.action in ['restore', 'retrieve']:
+            return qs
+        # Otherwise hide DELETED files from normal views
+        return qs.exclude(status='DELETED')
+
+    def destroy(self, request, *args, **kwargs):
+        from django.utils import timezone
+        # 1. Enforce Admin only
+        if request.user.role not in ['ADMIN', 'SUPER_ADMIN']:
+            return Response(
+                {"error": "Only Administrators are authorized to delete documents."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        instance = self.get_object()
+        
+        # Soft Delete Logic
+        instance.status = 'DELETED'
+        instance.deleted_at = timezone.now()
+        instance.deleted_by = request.user
+        instance.save()
+        
+        # 2. Log to Audit Trail
+        AuditLog.objects.create(
+            action="FILE_DELETED",
+            actor=request.user,
+            resource_type="DOCUMENT",
+            resource_id=instance.document_id,
+            metadata_info={"description": f"Document '{instance.file_name}' moved to Recycle Bin by Admin."}
+        )
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def restore(self, request, pk=None):
+        if request.user.role not in ['ADMIN', 'SUPER_ADMIN']:
+            return Response(
+                {"error": "Only Administrators are authorized to restore documents."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        instance = self.get_object()
+        if instance.status != 'DELETED':
+            return Response({"error": "Document is not deleted."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Restore Logic (Revert to verified if it was verified, else pending)
+        instance.status = 'VERIFIED' if instance.verified_by else 'PENDING_VERIFICATION'
+        instance.deleted_at = None
+        instance.deleted_by = None
+        instance.save()
+        
+        AuditLog.objects.create(
+            action="FILE_RESTORED",
+            actor=request.user,
+            resource_type="DOCUMENT",
+            resource_id=instance.document_id,
+            metadata_info={"description": f"Document '{instance.file_name}' restored from Recycle Bin by Admin."}
+        )
+        return Response({"status": "restored"})
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsInvestigator])
+    def flag(self, request, pk=None):
+        from django.utils import timezone
+        instance = self.get_object()
+        reason = request.data.get('reason', 'No reason provided')
+        
+        instance.flagged = True
+        instance.flagged_at = timezone.now()
+        instance.flagged_by = request.user
+        instance.flag_reason = reason
+        instance.save()
+        
+        AuditLog.objects.create(
+            action="FILE_FLAGGED",
+            actor=request.user,
+            resource_type="DOCUMENT",
+            resource_id=instance.document_id,
+            metadata_info={"description": f"Document flagged as Suspicious.", "reason": reason}
+        )
+        return Response({"status": "flagged"})
 
     parser_classes = [MultiPartParser, FormParser]
 
@@ -166,6 +283,18 @@ class DocumentViewSet(viewsets.ModelViewSet):
         
         doc_instance = serializer.instance
         
+        # If document_type is FIR, create FIR record
+        if doc_instance.document_type == 'FIR' and doc_instance.case:
+            # Enforce 1 FIR per Case
+            if FIR.objects.filter(case=doc_instance.case).exists():
+                doc_instance.delete()
+                return Response({"error": "This case already has an FIR. Only one FIR per case is allowed.", "code": "MULTIPLE_FIR"}, status=status.HTTP_400_BAD_REQUEST)
+            FIR.objects.create(
+                fir_number=f"FIR-{uuid.uuid4().hex[:6].upper()}",
+                case=doc_instance.case,
+                document=doc_instance
+            )
+        
         # Phase 3: Simulated Hyperledger Fabric Blockchain Logging
         BlockchainRecord.objects.create(
             document=doc_instance,
@@ -194,11 +323,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsLegalOfficer])
     def verify(self, request, pk=None):
+        from django.utils import timezone
         doc = self.get_object()
-        if doc.status == 'ACTIVE':
+        if doc.status == 'VERIFIED' or doc.status == 'ACTIVE':
             return Response({"error": "Already verified"}, status=status.HTTP_400_BAD_REQUEST)
         
-        doc.status = 'ACTIVE'
+        doc.status = 'VERIFIED'
+        doc.verified_by = request.user
+        doc.verified_at = timezone.now()
         doc.save()
         
         # Add a digital signature and audit log automatically
@@ -209,7 +341,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
             document_hash=doc.sha256_hash or "mock-hash"
         )
         AuditLog.objects.create(
-            action="VERIFIED_DOCUMENT",
+            action="FILE_VERIFIED",
             actor=request.user,
             resource_type="DOCUMENT",
             resource_id=doc.document_id,
@@ -244,4 +376,9 @@ class AuditLogViewSet(viewsets.ModelViewSet):
 class BlockchainRecordViewSet(viewsets.ModelViewSet):
     queryset = BlockchainRecord.objects.all()
     serializer_class = BlockchainRecordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class EvidenceChainViewSet(viewsets.ModelViewSet):
+    queryset = EvidenceChain.objects.all()
+    serializer_class = EvidenceChainSerializer
     permission_classes = [permissions.IsAuthenticated]

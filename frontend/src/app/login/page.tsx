@@ -79,10 +79,10 @@ export default function LoginPage() {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="p-3 bg-status-critical/10 border border-status-critical/30 rounded flex items-start gap-2"
+                className="p-3 bg-status-danger/10 border border-status-danger/30 rounded flex items-start gap-2"
               >
-                <AlertOctagon className="w-4 h-4 text-status-critical shrink-0 mt-0.5" />
-                <p className="text-[10px] font-bold text-status-critical tracking-widest uppercase leading-relaxed">
+                <AlertOctagon className="w-4 h-4 text-status-danger shrink-0 mt-0.5" />
+                <p className="text-[10px] font-bold text-status-danger tracking-widest uppercase leading-relaxed">
                   {error}
                 </p>
               </motion.div>

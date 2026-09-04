@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
-import { Plus, Briefcase } from "lucide-react";
+import api from "@/services/api";
+import { Plus, Briefcase, Upload } from "lucide-react";
 import { motion } from "framer-motion";
-import { CaseFilters } from "@/components/features/cases/CaseFilters";
-import { CaseListTable, Case } from "@/components/features/cases/CaseListTable";
+import { CaseFilters } from "@/components/cases/CaseFilters";
+import { CaseListTable, Case } from "@/components/cases/CaseListTable";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CasesPage() {
+  const { isInvestigator } = useAuth();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,9 +52,6 @@ export default function CasesPage() {
           </h1>
           <p className="text-content-muted mt-2 text-xs font-mono tracking-widest uppercase">Manage and monitor ongoing investigations</p>
         </div>
-        <button className="bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 px-5 py-2.5 rounded text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-2">
-          <Plus className="w-4 h-4" /> New Case
-        </button>
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-4">

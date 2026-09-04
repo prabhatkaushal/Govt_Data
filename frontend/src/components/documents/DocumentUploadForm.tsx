@@ -74,7 +74,7 @@ export default function DocumentUploadForm({
                   <p className="text-content-primary font-bold tracking-wide">{file.name}</p>
                   <p className="text-[10px] font-mono text-content-muted mt-2 uppercase">{(file.size / 1024 / 1024).toFixed(2)} MB • {file.type || 'UNKNOWN'}</p>
                 </div>
-                <button type="button" onClick={() => setFile(null)} className="text-[10px] text-status-critical hover:text-red-300 mt-4 font-bold uppercase tracking-widest border-b border-transparent hover:border-status-critical transition-all">
+                <button type="button" onClick={() => setFile(null)} className="text-[10px] text-status-danger hover:text-red-300 mt-4 font-bold uppercase tracking-widest border-b border-transparent hover:border-status-danger transition-all">
                   Remove File
                 </button>
               </motion.div>
@@ -148,7 +148,7 @@ export default function DocumentUploadForm({
               }`}>
                 <input type="radio" name="confidentiality" value={level} checked={confidentiality === level} onChange={() => setConfidentiality(level)} className="sr-only" />
                 <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
-                  level === 'TOP_SECRET' ? 'text-status-critical' : level === 'CONFIDENTIAL' ? 'text-accent' : 'text-content-muted'
+                  level === 'TOP_SECRET' ? 'text-status-danger' : level === 'CONFIDENTIAL' ? 'text-accent' : 'text-content-muted'
                 }`}>{level.replace('_', ' ')}</span>
               </label>
             ))}
