@@ -25,16 +25,18 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
   return (
     <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
       {[
-        { label: "Active Cases", value: stats.casesCount, icon: Briefcase, color: "text-accent" },
-        { label: "Documents", value: stats.documentsCount, icon: FileText, color: "text-content-primary" },
-        { label: "Verified", value: stats.verifiedCount, sub: `${stats.documentsCount > 0 ? Math.round((stats.verifiedCount / stats.documentsCount) * 100) : 0}% integrity`, icon: CheckCircle, color: "text-status-verification" },
-        { label: "Pending Review", value: stats.pendingCount, icon: ClipboardCheck, color: "text-status-warning" },
-        { label: "Evidence Items", value: stats.evidenceCount, sub: "Registered locally", icon: TestTube, color: "text-content-primary" },
-        { label: "Security Alerts", value: stats.alertsCount.toString().padStart(2, '0'), sub: stats.alertsCount > 0 ? `${stats.alertsCount} require attention` : "All clear", icon: AlertOctagon, color: stats.alertsCount > 0 ? "text-status-danger" : "text-status-verification" },
+        { label: "Active Cases", value: stats.casesCount, icon: Briefcase, color: "text-accent", iconBg: "bg-accent/10" },
+        { label: "Documents", value: stats.documentsCount, icon: FileText, color: "text-content-primary", iconBg: "bg-content-muted/10" },
+        { label: "Verified", value: stats.verifiedCount, sub: `${stats.documentsCount > 0 ? Math.round((stats.verifiedCount / stats.documentsCount) * 100) : 0}% integrity`, icon: CheckCircle, color: "text-status-verification", iconBg: "bg-status-verification/10" },
+        { label: "Pending Review", value: stats.pendingCount, icon: ClipboardCheck, color: "text-status-warning", iconBg: "bg-status-warning/10" },
+        { label: "Evidence Items", value: stats.evidenceCount, sub: "Registered locally", icon: TestTube, color: "text-content-primary", iconBg: "bg-content-muted/10" },
+        { label: "Security Alerts", value: stats.alertsCount.toString().padStart(2, '0'), sub: stats.alertsCount > 0 ? `${stats.alertsCount} require attention` : "All clear", icon: AlertOctagon, color: stats.alertsCount > 0 ? "text-status-danger" : "text-status-verification", iconBg: stats.alertsCount > 0 ? "bg-status-danger/10" : "bg-status-verification/10" },
       ].map((kpi, idx) => (
         <div key={idx} className="bg-surface border border-border rounded-xl p-6 flex flex-col justify-between min-h-[120px] group hover:bg-elevated hover:shadow-sm transition-all hover:border-border-hover">
           <div className="flex items-center justify-between">
-            <kpi.icon className={`w-5 h-5 ${kpi.color} opacity-70 group-hover:opacity-100 transition-opacity`} />
+            <div className={`w-10 h-10 rounded-lg ${kpi.iconBg} flex items-center justify-center`}>
+              <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
+            </div>
           </div>
           <div className="mt-4">
             <div className={`text-3xl font-bold ${kpi.color} tracking-tight`}>{kpi.value}</div>

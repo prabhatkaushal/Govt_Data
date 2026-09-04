@@ -72,7 +72,7 @@ export function Topbar() {
   }, []);
 
   return (
-    <header className="h-14 bg-background/70 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 sticky top-0 z-50 shrink-0">
+    <header className="h-14 bg-surface/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 sticky top-0 z-50 shrink-0">
       {/* LEFT: Section Title */}
       <div className="flex items-center gap-3 min-w-0 shrink-0">
         <button className="md:hidden text-content-muted hover:text-content-primary p-1" onClick={toggleMobileMenu}>

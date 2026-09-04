@@ -67,24 +67,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <motion.div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat fixed"
             initial={{ scale: 1.05, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.15 }}
+            animate={{ scale: 1, opacity: 0.08 }}
             transition={{ duration: 3, ease: "easeOut" }}
             style={{ backgroundImage: bgImage, mixBlendMode: 'screen' }}
           ></motion.div>
-          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background opacity-90"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-80"></div>
-        </div>
-      ) : mounted ? (
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <motion.div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat fixed"
-            initial={{ scale: 1.05, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.12 }}
-            transition={{ duration: 3, ease: "easeOut" }}
-            style={{ backgroundImage: bgImage, mixBlendMode: 'multiply' }}
-          ></motion.div>
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background opacity-90"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,transparent_0%,var(--background)_100%)] opacity-60"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/85 to-background opacity-95"></div>
         </div>
       ) : (
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-background"></div>

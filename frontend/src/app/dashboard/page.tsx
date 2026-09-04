@@ -99,7 +99,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <motion.div variants={fadeUp} className="flex flex-wrap gap-2">
         {[
-          { label: "New Case", icon: Plus, href: "/cases/new" },
+          { label: "New Case", icon: Plus, href: "/cases/new", primary: true },
           { label: "All Cases", icon: Briefcase, href: "/cases" },
           { label: "Upload Section", icon: Upload, href: "/documents/upload" },
           { label: "Global Semantic Search", icon: Search, href: "/search" },
@@ -107,7 +107,11 @@ export default function DashboardPage() {
           { label: "View Audit", icon: ClipboardCheck, href: "/audit" },
         ].filter(action => !action.roles || action.roles.includes(user?.role || "")).map(action => (
           <Link key={action.label} href={action.href}
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-surface border border-border rounded-lg text-[13px] font-medium text-content-secondary hover:text-content-primary hover:border-border-hover hover:bg-elevated hover:shadow-sm transition-all"
+            className={`inline-flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
+              action.primary
+                ? 'bg-accent text-white hover:bg-accent-hover shadow-sm'
+                : 'bg-surface border border-border text-content-secondary hover:text-content-primary hover:border-border-hover hover:bg-elevated hover:shadow-sm'
+            }`}
           >
             <action.icon className="w-4 h-4" />
             {action.label}
@@ -131,9 +135,15 @@ export default function DashboardPage() {
           
           {/* Security Status */}
           <motion.div variants={fadeUp} className="bg-surface border border-border rounded-xl p-6 shadow-sm">
-            <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2 mb-6">
-              <ShieldCheck className="w-4 h-4 text-status-verification" /> System Security
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-status-verification" /> System Security
+              </h2>
+              <span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-[0.1em] uppercase px-2.5 py-1 rounded-md bg-accent/10 text-accent border border-accent/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                Secure
+              </span>
+            </div>
             <div className="space-y-4">
               {[
                 { label: "Authentication", status: "Operational", icon: Lock, ok: true },

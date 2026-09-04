@@ -4,17 +4,17 @@
 
 @layer base {
   :root {
-    --background: #F1F5F9;
+    --background: #F5F7FA;
     --surface: #FFFFFF;
-    --elevated: #F8FAFC;
-    --border: #E2E8F0;
-    --border-hover: #CBD5E1;
+    --elevated: #F8FAFB;
+    --border: #E5E9EF;
+    --border-hover: #CBD2DA;
     --content-primary: #0F172A;
     --content-secondary: #334155;
     --content-muted: #64748B;
-    --accent: #2563EB;
-    --accent-hover: #1D4ED8;
-    --accent-muted: rgba(37, 99, 235, 0.08);
+    --accent: #0D9488;
+    --accent-hover: #0F766E;
+    --accent-muted: rgba(13, 148, 136, 0.08);
     --status-verification: #059669;
     --status-warning: #D97706;
     --status-critical: #DC2626;
@@ -23,22 +23,22 @@
   }
 
   .dark {
-    --background: #060B14;
-    --surface: #0D131F;
-    --elevated: #131B2A;
+    --background: #0A0F1A;
+    --surface: #111827;
+    --elevated: #1A2233;
     --border: #1E293B;
     --border-hover: #334155;
     --content-primary: #F8FAFC;
     --content-secondary: #94A3B8;
     --content-muted: #475569;
-    --accent: #38BDF8;
-    --accent-hover: #0EA5E9;
-    --accent-muted: rgba(56, 189, 248, 0.1);
-    --status-verification: #0E956A;
-    --status-warning: #E88D14;
-    --status-critical: #D92E2E;
-    --status-ai: #7B5EE4;
-    --status-blockchain: #0C8CE9;
+    --accent: #14B8A6;
+    --accent-hover: #0D9488;
+    --accent-muted: rgba(20, 184, 166, 0.1);
+    --status-verification: #10B981;
+    --status-warning: #F59E0B;
+    --status-critical: #EF4444;
+    --status-ai: #818CF8;
+    --status-blockchain: #38BDF8;
   }
 
   .theme-legal {
@@ -50,8 +50,8 @@
     --content-primary: #382A1B;
     --content-secondary: #6B5B4C;
     --content-muted: #9E8E7D;
-    --accent: 210 100% 60%;
-    --accent-hover: 210 100% 70%;
+    --accent: #0D9488;
+    --accent-hover: #0F766E;
   }
 
   .dark .theme-legal {
@@ -98,12 +98,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--border-hover);
 }
 
 /* Ambient Background Components - HIDING THESE FOR MINIMALIST LOOK */
@@ -132,7 +132,11 @@ input:focus, select:focus, textarea:focus, button:focus {
 
 /* Redefine shadow utility for a soft minimalist feel on cards */
 .shadow-premium {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dark .shadow-premium {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 body.mobile-sidebar-open aside#sidebar {

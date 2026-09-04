@@ -102,7 +102,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside id="sidebar" className="w-[260px] bg-surface/80 backdrop-blur-md border-r border-border hidden md:flex flex-col h-full shrink-0 relative z-20">
+    <aside id="sidebar" className="w-[260px] bg-surface border-r border-border hidden md:flex flex-col h-full shrink-0 relative z-20">
       {/* Brand */}
       <div className="h-16 flex items-center px-5 border-b border-border shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
