@@ -1,0 +1,39 @@
+# Blockchain & Hashing Basics (and Our Implementation)
+
+## What is Hashing?
+Hashing is the process of taking input data (like a PDF file or a text string) of any size and passing it through a mathematical algorithm to produce a fixed-size string of characters. 
+- In this project, we use the **SHA-256** algorithm.
+- **The Golden Rule:** No matter how many times you hash the same exact file, you will always get the *exact same hash*. But if you change even a single comma in the file, the resulting hash will be completely different. 
+- **Use Case:** It acts as a "Digital Fingerprint." If the fingerprint of a document changes, we know it has been tampered with.
+
+## What is a Blockchain?
+A blockchain is an immutable (unchangeable), append-only digital ledger. 
+It gets its name because records are grouped into "blocks," and each block contains the **hash** of the block that came immediately before it. 
+
+Because Block B contains the hash of Block A, if a hacker tries to secretly edit the data in Block A, Block A's hash will change. This immediately makes Block B invalid (because it's pointing to the old hash). This chain reaction makes tampering mathematically impossible to hide.
+
+---
+
+## How It Is Implemented in Our Project
+
+In this project, hashing and blockchain concepts are implemented to ensure a **Cryptographically Secure Chain of Custody** for digital evidence. We never store the actual physical file on the blockchain (that would be too expensive and slow). Instead, we store the *hash* of the file.
+
+Here are the 4 main ways it's implemented in our database (`backend/api/models.py`):
+
+### 1. Document Hashing (`Document` model)
+When a document is uploaded, we immediately calculate its `sha256_hash` and save it to the database. Later, if someone wants to verify the document, they can re-upload the file. We calculate the hash of the new upload and compare it to the original hash. If they match, the file is 100% authentic.
+
+### 2. Evidence Chain of Custody (`EvidenceChain` model)
+Every time a document is viewed, downloaded, or updated, we record an event. To ensure no one deletes a log to cover their tracks, each log has:
+- `previous_hash`: Points to the hash of the previous event.
+- `current_hash`: The hash of the current event.
+This creates a micro-blockchain for every single document. If a rogue admin deletes a log, the chain is broken, and the system will instantly flag the audit trail as tampered.
+
+### 3. Digital Signatures (`DigitalSignature` model)
+When an investigator signs a document, they aren't just signing the file—they are signing the `document_hash`. This guarantees Non-Repudiation (they can't claim they didn't sign it) and guarantees that the document hasn't been altered since they signed it.
+
+### 4. The Main Ledger (`BlockchainRecord` model)
+To create an immutable overall system, we have a `BlockchainRecord`. This model tracks global state changes:
+- It records a `document_hash`, who modified it, and what action they took.
+- Crucially, it links blocks together using `previous_block_hash` and `current_block_hash`.
+- It records a `transaction_id`, which allows the system to "anchor" our local database hashes to a public blockchain network (like Ethereum or Polygon) for ultimate decentralized proof, or simulate an unhackable local ledger.

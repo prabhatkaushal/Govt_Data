@@ -1,0 +1,35 @@
+# AI Microservices & Ollama Integration Basics
+
+In this project, the AI capabilities (like summarizing documents and answering questions based on case files) are isolated into a dedicated "AI Microservice." This service uses a technique called RAG (Retrieval-Augmented Generation) powered by a local AI runner called Ollama.
+
+Here is a breakdown of how it works, how it fetches data, and how it handles accuracy.
+
+## 1. What is the AI Microservice doing?
+The microservice is a lightweight FastAPI backend that exposes specific endpoints (like `/search/`, `/summarize/`, `/generate-embeddings/`). It is responsible for:
+- Extracting text from uploaded files (PDFs, TXT).
+- Converting that text into numerical formats called "Embeddings."
+- Storing and searching those embeddings.
+- Communicating with a locally running AI model (via Ollama) to synthesize answers or summaries.
+
+## 2. How Data is Fetched and Processed (The RAG Pipeline)
+When a user asks a question (e.g., "What happened in the bank robbery case?"), the system uses RAG to fetch the answer. Here is the step-by-step process:
+
+1. **Embedding generation:** When a document is uploaded, the text is broken into "chunks". A model (`sentence-transformers/all-MiniLM-L6-v2`) converts these text chunks into numerical vectors (embeddings) and saves them in a vector store (`vector_store.pkl`).
+2. **Searching (Retrieval):** When a user asks a question, the microservice converts the *question* into a vector. It then compares the question's vector against all the document vectors using "Cosine Similarity" (measuring the mathematical distance between them). 
+3. **Filtering:** The system grabs the top chunks of text that match the question mathematically (in this codebase, it fetches chunks with a similarity score of >= 0.15).
+4. **Generating (The Ollama Part):** The microservice sends an HTTP request to your local Ollama instance running the `llama3` model. It passes a specialized prompt: *"Using the following evidence documents, answer the question accurately..."* followed by the relevant text chunks it just retrieved. 
+5. **Response:** Ollama reads the context chunks and replies with a human-like synthesis, which the microservice sends back to the frontend.
+
+## 3. What is Ollama?
+Ollama is a tool that allows you to run large language models (LLMs) like LLaMA 3, Mistral, or Phi locally on your own machine. 
+- It works similarly to Docker, but for AI models. 
+- Because it runs locally, no sensitive case data or documents are sent over the internet to companies like OpenAI or Google. It is 100% private and secure.
+
+## 4. How Accurate is it? (Accuracy & Limitations)
+Because we are using LLMs, "accuracy" is not a fixed percentage. It is dependent on three factors:
+
+1. **The Retrieval Accuracy:** The system uses a similarity threshold of `0.15` to fetch related text. This is a fairly permissive threshold, meaning it will cast a wide net to find related documents. If the wrong document chunks are retrieved, the AI's answer will be wrong.
+2. **The Context Limit:** In this implementation, the summary endpoint limits the text sent to Ollama to 4000 characters. If a document is extremely long, Ollama only sees the first chunk of it, which may reduce the accuracy of full-document summaries.
+3. **The LLM (LLaMA 3):** Since the context is provided to LLaMA 3, it heavily reduces "hallucinations" (the AI making things up). The AI is explicitly told to answer *based on the provided text*. However, smaller local models (like the 8B parameter version of LLaMA 3) might occasionally misunderstand complex legal or technical nuances in the text.
+
+In summary, the accuracy is generally very high for direct factual lookups from the provided context, but it relies heavily on how well the initial document text was extracted and vectorized.
