@@ -9,11 +9,13 @@ import {
   AlertOctagon, Activity, ChevronRight, Lock, Database,
   Hexagon, PenTool, Plus, Upload, Search, ClipboardCheck
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import ActiveCasesTable from "@/components/dashboard/ActiveCasesTable";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     casesCount: 0,
     documentsCount: 0,
@@ -99,11 +101,11 @@ export default function DashboardPage() {
         {[
           { label: "New Case", icon: Plus, href: "/cases/new" },
           { label: "All Cases", icon: Briefcase, href: "/cases" },
-          { label: "Register Evidence", icon: TestTube, href: "/evidence" },
-          { label: "Search", icon: Search, href: "/search" },
-          { label: "Verify Document", icon: CheckCircle, href: "/security" },
+          { label: "Upload Section", icon: Upload, href: "/documents/upload" },
+          { label: "Global Semantic Search", icon: Search, href: "/search" },
+          { label: "Verify Document", icon: CheckCircle, href: "/security", roles: ["LEGAL_OFFICER", "SUPER_ADMIN", "ADMIN"] },
           { label: "View Audit", icon: ClipboardCheck, href: "/audit" },
-        ].map(action => (
+        ].filter(action => !action.roles || action.roles.includes(user?.role || "")).map(action => (
           <Link key={action.label} href={action.href}
             className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-surface border border-border rounded-lg text-[13px] font-medium text-content-secondary hover:text-content-primary hover:border-border-hover hover:bg-elevated hover:shadow-sm transition-all"
           >

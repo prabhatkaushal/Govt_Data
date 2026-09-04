@@ -57,7 +57,7 @@ export function Sidebar() {
     {
       name: "EVIDENCE",
       items: [
-        { name: "Evidence Registry", href: "/evidence", icon: TestTube },
+        { name: "Upload Section", href: "/documents/upload", icon: Upload },
       ]
     },
     {
@@ -72,6 +72,7 @@ export function Sidebar() {
       items: [
         { name: "Security Center", href: "/security", icon: ShieldCheck },
         { name: "Global Verify", href: "/verify", icon: ScanText },
+        { name: "Verify Documents", href: "/verify-documents", icon: ClipboardCheck, roles: ["LEGAL_OFFICER", "SUPER_ADMIN"] },
         { name: "Audit Trail", href: "/audit", icon: ListOrdered },
       ]
     },
@@ -146,7 +147,7 @@ export function Sidebar() {
                     className="overflow-hidden mt-1"
                   >
                     <div className="space-y-px">
-                      {group.items.map((item) => {
+                      {group.items.filter((item) => !item.roles || item.roles.includes(userRole)).map((item) => {
                         const isActive = pathname === item.href || 
                           (item.href !== "/dashboard" && !item.href.includes("?") && pathname.startsWith(item.href));
                         return (

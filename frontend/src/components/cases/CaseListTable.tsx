@@ -10,6 +10,7 @@ export interface Case {
   created_at: string;
   updated_at?: string;
   investigating_officer?: any;
+  verification_status?: string;
 }
 
 interface CaseListTableProps {
@@ -39,6 +40,7 @@ export function CaseListTable({ cases, loading }: CaseListTableProps) {
                 <th className="px-6 py-4 font-normal">Title</th>
                 <th className="px-6 py-4 font-normal">Status</th>
                 <th className="px-6 py-4 font-normal">Classification</th>
+                <th className="px-6 py-4 font-normal">Verification</th>
                 <th className="px-6 py-4 font-normal">Officer</th>
                 <th className="px-6 py-4 font-normal text-right">Action</th>
               </tr>
@@ -69,6 +71,15 @@ export function CaseListTable({ cases, loading }: CaseListTableProps) {
                       'text-content-muted'
                     }`}>
                       {c.confidentiality_level.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center text-[10px] font-bold tracking-[0.2em] uppercase ${
+                      c.verification_status?.toUpperCase() === 'VERIFIED' ? 'text-status-verification' :
+                      c.verification_status?.toUpperCase() === 'FLAGGED' ? 'text-status-warning' :
+                      'text-content-muted'
+                    }`}>
+                      {c.verification_status ? c.verification_status.toUpperCase() : '-'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-content-secondary tracking-wide">
