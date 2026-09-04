@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { isInvestigator } = useAuth();
+  const { isInvestigator, user } = useAuth();
 
   const allNavItems = [
     { name: "Dashboard", href: "/dashboard", icon: "📊" },
@@ -18,23 +18,21 @@ export function Sidebar() {
   const navItems = allNavItems.filter(item => !item.investigatorOnly || isInvestigator);
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 hidden md:flex flex-col">
-      <div className="h-16 flex items-center px-6 border-b border-slate-800">
-        <span className="text-xl font-bold text-white tracking-wider flex items-center gap-2">
-          <span className="text-blue-500">🛡️</span> SECURE-OPS
-        </span>
+    <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col">
+      <div className="h-16 flex items-center px-6 border-b border-border">
+        <h1 className="text-xl font-bold tracking-tight text-primary">NyayaVault</h1>
       </div>
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard" && item.href !== "/documents/upload" && item.href !== "/cases/upload");
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
                 isActive
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               <span className="text-lg">{item.icon}</span>
@@ -43,15 +41,14 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="p-4 border-t border-slate-800">
-        <div className="bg-slate-800 rounded-md p-4">
-          <p className="text-xs text-slate-400 font-semibold mb-1">SYSTEM STATUS</p>
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+      <div className="p-4 border-t border-border">
+        <div className="bg-muted/50 rounded-lg p-4">
+          <p className="text-xs font-semibold text-foreground">SECURITY CLEARANCE</p>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              {user?.role?.replace('_', ' ') || "LEVEL 4 ACTIVE"}
             </span>
-            <span className="text-sm text-emerald-500 font-medium">All Systems Operational</span>
           </div>
         </div>
       </div>

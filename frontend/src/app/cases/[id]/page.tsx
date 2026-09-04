@@ -33,7 +33,10 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
           <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors border border-slate-700">
             Edit Case
           </button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+          <button 
+            onClick={() => alert("Report generation initiated. You will be notified when it's ready.")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
             Generate Report
           </button>
         </div>

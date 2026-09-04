@@ -7,9 +7,10 @@ from .serializers import *
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [permissions.AllowAny]
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related('department').all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -21,13 +22,13 @@ class UserViewSet(viewsets.ModelViewSet):
 from .permissions import IsInvestigator, IsLegalOfficer, IsReadOnly
 
 class CaseViewSet(viewsets.ModelViewSet):
-    queryset = Case.objects.all()
+    queryset = Case.objects.select_related('investigating_officer', 'department').prefetch_related('documents').all()
     serializer_class = CaseSerializer
     permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
     http_method_names = ['get', 'post', 'head', 'options']
 
 class DocumentViewSet(viewsets.ModelViewSet):
-    queryset = Document.objects.all()
+    queryset = Document.objects.select_related('case', 'uploaded_by').all()
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated, IsReadOnly | IsInvestigator]
     http_method_names = ['get', 'post', 'head', 'options']

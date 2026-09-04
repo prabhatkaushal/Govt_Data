@@ -12,6 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   isInvestigator: boolean;
   isLawyer: boolean;
+  updateUser: (newUserData: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,8 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const storedUser = localStorage.getItem('user');
+    const token = sessionStorage.getItem('access_token');
+    const storedUser = sessionStorage.getItem('user');
     if (token && storedUser) {
       setIsAuthenticated(true);
       setUser(JSON.parse(storedUser));
@@ -38,9 +39,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post("/auth/login/", { username: idNumber, password: passcode });
       const { access, refresh, user: userData } = res.data;
       
-      localStorage.setItem("access_token", access);
-      localStorage.setItem("refresh_token", refresh);
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("access_token", access);
+      sessionStorage.setItem("refresh_token", refresh);
+      sessionStorage.setItem("user", JSON.stringify(userData));
       
       setIsAuthenticated(true);
       setUser(userData);
@@ -52,9 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("user");
     setIsAuthenticated(false);
     setUser(null);
     router.push("/login");
@@ -63,8 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isInvestigator = user?.role === 'INVESTIGATING_OFFICER' || user?.role === 'SUPER_ADMIN';
   const isLawyer = user?.role === 'LEGAL_OFFICER' || user?.role === 'SUPER_ADMIN';
 
+  const updateUser = (newUserData: any) => {
+    const updatedUser = { ...user, ...newUserData };
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading, isInvestigator, isLawyer }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading, isInvestigator, isLawyer, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -55,7 +55,7 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle className="text-xl text-white">Authentication Required</CardTitle>
             <CardDescription className="text-slate-400">
-              Enter your authorized department credentials. (e.g. 250101 for Police, 250201 for Legal)
+              Enter your authorized department credentials. (e.g. 26010001 for Police, 26040001 for Legal)
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
@@ -71,7 +71,7 @@ export default function LoginPage() {
                   id="id-number" 
                   value={idNumber}
                   onChange={(e) => setIdNumber(e.target.value)}
-                  placeholder="e.g. 250101" 
+                  placeholder="e.g. 26010001" 
                   required 
                   className="bg-slate-950 border-slate-800 text-white placeholder:text-slate-600 focus-visible:ring-blue-500 font-mono"
                 />
