@@ -115,7 +115,7 @@ export function Sidebar() {
           <div className="w-7 h-7 rounded bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:border-accent/40 transition-colors">
             <ShieldCheck className="w-3.5 h-3.5 text-accent" />
           </div>
-          <span className="text-xs font-bold text-content-primary tracking-[0.2em] uppercase">SECURE-OPS</span>
+          <span className="text-[13px] font-bold text-content-primary tracking-[0.2em] uppercase">SECURA</span>
         </Link>
       </div>
       
