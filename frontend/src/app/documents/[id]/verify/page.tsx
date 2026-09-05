@@ -25,11 +25,9 @@ export default function DocumentVerificationPage({ params }: { params: { id: str
         const document = res.data;
         setDoc(document);
         
-        // Fetch Audit Logs specifically for this document ID
         const auditRes = await api.get(`/audit-logs/?resource_id=${document.document_id}`);
         setAuditLogs(auditRes.data);
 
-        // Fetch Evidence Chain and filter for this document
         const evRes = await api.get(`/evidence/`);
         const relatedEvidence = evRes.data.filter((e: any) => 
           e.document === document.id || e.document?.id === document.id
@@ -60,7 +58,6 @@ export default function DocumentVerificationPage({ params }: { params: { id: str
       setTimeout(async () => {
         if (hashHex === doc.sha256_hash) {
           setVerificationState('MATCH');
-          // If status was pending, auto-verify it on backend
           if (doc.status !== 'ACTIVE') {
              await api.post(`/documents/${doc.id}/verify/`);
           }
@@ -193,7 +190,7 @@ export default function DocumentVerificationPage({ params }: { params: { id: str
         </div>
       </div>
 
-      {/* DOCUMENT HISTORY & CHANGES SECTION */}
+      
       <div className="mt-12 bg-surface border border-border rounded-xl shadow-premium overflow-hidden">
         <div className="p-6 border-b border-border bg-elevated/50 flex items-center justify-between">
           <div>
@@ -209,7 +206,7 @@ export default function DocumentVerificationPage({ params }: { params: { id: str
         <div className="p-6">
           <div className="relative border-l-2 border-border/50 ml-4 space-y-8">
             
-            {/* COMBINED AND SORTED TIMELINE */}
+            
             {[
               ...auditLogs.map(log => ({ ...log, type: 'AUDIT', ts: new Date(log.timestamp).getTime() })),
               ...evidenceChain.map(ev => ({ ...ev, type: 'EVIDENCE', ts: new Date(ev.timestamp).getTime() }))

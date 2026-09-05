@@ -22,7 +22,6 @@ export default function ChainOfCustodyPage() {
   useEffect(() => {
     const fetchEvidence = async () => {
       try {
-        // Here we just fetch all documents that could be evidence to attach to the chain
         const docRes = await api.get('/documents/');
         setEvidenceList(docRes.data);
       } catch (err) {

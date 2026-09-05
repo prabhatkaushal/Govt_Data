@@ -27,7 +27,6 @@ export default function EvidencePage() {
   const [documents, setDocuments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   
-  // Filter states
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("");
   const [caseFilter, setCaseFilter] = React.useState("");
@@ -53,19 +52,16 @@ export default function EvidencePage() {
     fetchData();
   }, []);
 
-  // Helper to find document and its case for a given evidence item
   const getCaseForEvidence = (item: any) => {
     const docId = typeof item.document === 'object' ? item.document?.id : item.document;
     const doc = documents.find(d => d.id === docId);
     return doc?.case?.case_number || doc?.case;
   };
 
-  // Compute unique values for dropdowns
   const uniqueStatuses = Array.from(new Set(evidence.map(e => e.action))).filter(Boolean);
   const uniqueCases = Array.from(new Set(evidence.map(e => getCaseForEvidence(e)))).filter(Boolean);
   const uniqueLocations = Array.from(new Set(evidence.map(e => e.location))).filter(Boolean);
 
-  // Filter evidence
   const filteredEvidence = evidence.filter(item => {
     const matchesSearch = searchQuery === "" || 
       `EV-${item.id}`.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -18,7 +18,20 @@ export default function CasesPage() {
     const fetchCases = async () => {
       try {
         const res = await api.get('/cases/');
-        setCases(res.data);
+        const processedCases = res.data.map((c: any) => {
+          let vStatus = c.verification_status || 'PENDING_VERIFICATION';
+          if (c.documents && c.documents.length > 0) {
+            if (c.documents.some((d: any) => d.flagged)) {
+              vStatus = 'FLAGGED';
+            } else if (c.documents.every((d: any) => d.status === 'VERIFIED')) {
+              vStatus = 'VERIFIED';
+            } else {
+              vStatus = 'PENDING_VERIFICATION';
+            }
+          }
+          return { ...c, verification_status: vStatus };
+        });
+        setCases(processedCases);
       } catch (err) {
         console.error("Failed to fetch cases", err);
       } finally {
@@ -55,10 +68,10 @@ export default function CasesPage() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-4">
-        {/* FILTERS */}
+        
         <CaseFilters />
 
-        {/* DATA TABLE */}
+        
         <CaseListTable cases={cases} loading={loading} />
       </motion.div>
     </motion.div>

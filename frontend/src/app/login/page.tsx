@@ -30,29 +30,29 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0B1214] p-4 sm:p-6 lg:p-8 relative overflow-hidden font-sans text-[#EDF3F1]">
       
-      {/* Real CSS-3D Background */}
+      
       <SecureBackground3D />
 
-      {/* Main Authentication Card */}
+      
       <motion.div 
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="w-full max-w-[1050px] bg-[rgba(18,29,32,0.82)] backdrop-blur-2xl border border-[#304347] rounded-[26px] shadow-[0_30px_80px_rgba(0,0,0,0.6)] flex flex-col md:flex-row overflow-hidden relative z-10"
       >
-        {/* Subtle internal highlight along the top edge */}
+        
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#3C9D91]/30 to-transparent" />
 
-        {/* Left Section (Branding & Features) */}
+        
         <div className="w-full md:w-[50%] p-8 lg:p-12 bg-gradient-to-b from-[#0d1518] to-[#111b21] border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col justify-center relative overflow-hidden">
-          {/* Subtle background glow */}
+          
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
              <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#14b8a6] rounded-full blur-[120px] opacity-10" />
              <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#2dd4bf] rounded-full blur-[120px] opacity-10" />
           </div>
 
           <div className="max-w-[420px] mx-auto md:mx-0 w-full relative z-10 flex flex-col items-center md:items-start text-center md:text-left mt-10">
-            {/* Header & Branding */}
+            
             <div className="mb-10 w-full flex flex-col items-center md:items-start text-center md:text-left">
               <h1 className="text-5xl md:text-6xl font-bold tracking-widest mb-6 bg-gradient-to-r from-white via-white to-[#2dd4bf] bg-clip-text text-transparent drop-shadow-sm">
                 SECURA
@@ -78,7 +78,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Section (Login Form) */}
+        
         <div className="w-full md:w-[52%] p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-transparent">
           <div className="max-w-[380px] w-full mx-auto md:mx-0 lg:mx-auto">
             <h2 className="text-[26px] font-semibold text-[#EDF3F1] mb-1 tracking-tight">Welcome back</h2>
@@ -166,7 +166,7 @@ export default function LoginPage() {
               <ShieldCheck className="w-[12px] h-[12px] text-[#6BAE91]" /> Access monitored • Sessions encrypted
             </div>
             
-            {/* Dev Only Demo Credentials */}
+            
             {process.env.NODE_ENV !== 'production' && (
               <div className="mt-4 text-[10px] text-[#9DAFAD] font-medium leading-relaxed bg-[#1A292C]/50 rounded-lg p-2.5 text-center border border-[#304347]/30">
                 Demo: Admin (<span className="font-semibold text-[#3C9D91]">26000000</span>) | Inv. (<span className="font-semibold text-[#3C9D91]">26010001</span>) | Pass: <span className="font-semibold text-[#3C9D91]">gov123</span>

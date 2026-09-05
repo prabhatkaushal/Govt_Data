@@ -52,6 +52,18 @@ export default function AuditPage() {
     log.actor_details?.username?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const getActionColor = (action: string) => {
+    if (!action) return "text-content-secondary border-border bg-background";
+    const act = action.toUpperCase();
+    if (act.includes('VERIFIED')) return "text-status-verification border-status-verification/30 bg-status-verification/10";
+    if (act.includes('FLAGGED')) return "text-status-warning border-status-warning/30 bg-status-warning/10";
+    if (act.includes('DELETED')) return "text-status-danger border-status-danger/30 bg-status-danger/10";
+    if (act.includes('VIEWED') || act.includes('READ')) return "text-status-info border-status-info/30 bg-status-info/10";
+    if (act.includes('UPLOAD') || act.includes('CREATED')) return "text-accent border-accent/30 bg-accent/10";
+    if (act.includes('UPDATED') || act.includes('REPLACED') || act.includes('RESTORED')) return "text-status-success border-status-success/30 bg-status-success/10";
+    return "text-content-primary border-border bg-background";
+  };
+
   return (
     <div className="min-h-screen bg-background text-content-primary p-6">
       <motion.div
@@ -117,19 +129,21 @@ export default function AuditPage() {
             ) : (
               <div className="divide-y divide-border/50 max-h-[600px] overflow-y-auto">
                 {filteredLogs.map(log => (
-                  <div key={log.id} className="grid grid-cols-12 gap-4 p-4 text-xs text-content-secondary hover:bg-elevated transition-colors">
+                  <div key={log.id} className="grid grid-cols-12 gap-4 p-4 text-xs text-content-secondary hover:bg-elevated transition-colors items-center">
                     <div className="col-span-2 font-mono text-[10px]">{new Date(log.timestamp).toLocaleString()}</div>
                     <div className="col-span-2">
                       <span className="font-bold text-content-primary">{log.actor_details?.username}</span>
                     </div>
-                    <div className="col-span-2">
-                      <span className="bg-background border border-border px-2 py-1 rounded text-[10px] font-mono text-accent">{log.action}</span>
+                    <div className="col-span-2 flex">
+                      <span className={`border px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap ${getActionColor(log.action)}`}>
+                        {log.action}
+                      </span>
                     </div>
                     <div className="col-span-4 truncate">
                       <span className="text-content-primary font-bold mr-2">{log.resource_type}: {log.resource_id}</span>
                       {log.metadata_info?.description || JSON.stringify(log.metadata_info)}
                     </div>
-                    <div className="col-span-2 font-mono text-[10px] text-content-muted">{log.ip_address || '127.0.0.1'}</div>
+                    <div className="col-span-2 font-mono text-[10px] text-content-muted">{log.ip_address || 'Unknown'}</div>
                   </div>
                 ))}
               </div>

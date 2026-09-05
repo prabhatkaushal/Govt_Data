@@ -42,7 +42,7 @@ class User(AbstractUser):
 
 class Case(models.Model):
     case_number = models.CharField(max_length=100, unique=True, db_index=True)
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(max_length=255, db_index=True, unique=True)
     description = models.TextField(blank=True, null=True)
     case_type = models.CharField(max_length=100, blank=True, null=True)
     police_station = models.CharField(max_length=255, blank=True, null=True)
@@ -50,6 +50,7 @@ class Case(models.Model):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name="cases")
     priority = models.CharField(max_length=50, default="MEDIUM")
     status = models.CharField(max_length=50, default="OPEN")
+    verification_status = models.CharField(max_length=50, blank=True, null=True, default='PENDING_VERIFICATION')
     confidentiality_level = models.CharField(max_length=50, default="INTERNAL")
     incident_date = models.DateTimeField(blank=True, null=True)
     registration_date = models.DateTimeField(blank=True, null=True)
@@ -89,7 +90,6 @@ class Document(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_accessed_at = models.DateTimeField(blank=True, null=True)
     
-    # Audit & Lifecycle Tracking
     deleted_at = models.DateTimeField(blank=True, null=True)
     deleted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="deleted_documents")
     

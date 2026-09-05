@@ -134,7 +134,7 @@ export default function DocumentsPage() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-4">
-        {/* FILTERS */}
+        
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[250px] group">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-content-muted group-focus-within:text-accent transition-colors" />
@@ -227,7 +227,7 @@ export default function DocumentsPage() {
           </div>
         </div>
 
-        {/* DATA TABLE */}
+        
         <DocumentListTable 
           documents={filteredDocuments}
           loading={loading}

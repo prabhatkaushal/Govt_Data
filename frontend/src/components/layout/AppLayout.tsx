@@ -81,7 +81,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Topbar />
         
-        {/* Page content with smooth spatial transitions */}
+        
         <AnimatePresence mode="wait">
           <motion.main
             key={pathname}

@@ -27,9 +27,22 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
           api.get(`/audit-logs/?resource_id=${params.id}`)
         ]);
         setCaseData(caseRes.data);
-        // Sometimes backend filters aren't perfect in dummy setups, filter manually just in case
-        setDocuments(docRes.data.filter((d: any) => d.case === parseInt(params.id) || d.case?.id === parseInt(params.id)));
+        const docs = docRes.data.filter((d: any) => d.case === parseInt(params.id) || d.case?.id === parseInt(params.id));
+        setDocuments(docs);
         setTimeline(auditRes.data.filter((l: any) => l.resource_type === 'Case' && l.resource_id === params.id));
+
+        let vStatus = caseRes.data.verification_status || 'PENDING_VERIFICATION';
+        if (docs && docs.length > 0) {
+          if (docs.some((d: any) => d.flagged)) {
+            vStatus = 'FLAGGED';
+          } else if (docs.every((d: any) => d.status === 'VERIFIED')) {
+            vStatus = 'VERIFIED';
+          } else {
+            vStatus = 'PENDING_VERIFICATION';
+          }
+        }
+        
+        setCaseData({ ...caseRes.data, verification_status: vStatus });
       } catch (err) {
         console.error("Failed to fetch case details", err);
       } finally {
@@ -45,7 +58,6 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
     setIsGenerating(false);
     setReportGenerated(true);
     
-    // Trigger mock download
     const blob = new Blob([`CONFIDENTIAL CASE REPORT: ${caseData.case_number}\n\nTitle: ${caseData.title}\nStatus: ${caseData.status}`], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

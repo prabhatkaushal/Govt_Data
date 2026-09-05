@@ -46,12 +46,16 @@ export default function DocumentDetailView({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-content-primary tracking-tight font-mono">{id}</h1>
-            <span className="bg-status-verification/10 text-status-verification border border-status-verification/20 px-2.5 py-0.5 rounded text-[10px] font-bold tracking-widest flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3" /> VERIFIED
-            </span>
+            <h1 className="text-3xl font-bold text-content-primary tracking-tight font-mono">{docData?.title || id}</h1>
+            {docData?.status === 'VERIFIED' && (
+              <span className="bg-status-verification/10 text-status-verification border border-status-verification/20 px-2.5 py-0.5 rounded text-[10px] font-bold tracking-widest flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" /> VERIFIED
+              </span>
+            )}
           </div>
-          <p className="text-content-secondary text-lg font-medium tracking-wide">Server Audit Log - October 12</p>
+          <p className="text-content-secondary text-lg font-medium tracking-wide">
+            {docData?.document_type?.replace(/_/g, ' ') || 'Document'} {docData?.case ? `| Case: ${docData.case}` : ''}
+          </p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -229,13 +233,21 @@ export default function DocumentDetailView({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50 font-mono text-xs">
-                  <tr className="hover:bg-elevated/40 transition-colors">
-                    <td className="px-6 py-4 text-accent">TXN-8A9B23C4</td>
-                    <td className="px-6 py-4 text-content-primary">UPLOAD_ENCRYPTED</td>
-                    <td className="px-6 py-4 text-content-secondary">2026-08-30 00:15:22</td>
-                    <td className="px-6 py-4 text-content-secondary">26010001 (Cyber)</td>
-                    <td className="px-6 py-4 text-right text-status-verification">COMMITTED</td>
-                  </tr>
+                  {docData ? (
+                    <tr className="hover:bg-elevated/40 transition-colors">
+                      <td className="px-6 py-4 text-accent">TXN-{docData.sha256_hash?.substring(0, 8).toUpperCase() || 'PENDING'}</td>
+                      <td className="px-6 py-4 text-content-primary">ANCHORED</td>
+                      <td className="px-6 py-4 text-content-secondary">{new Date(docData.created_at).toLocaleString()}</td>
+                      <td className="px-6 py-4 text-content-secondary">{docData.uploaded_by?.username || 'SYSTEM'}</td>
+                      <td className="px-6 py-4 text-right text-status-verification">COMMITTED</td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-content-muted text-sm italic">
+                        No blockchain records available.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

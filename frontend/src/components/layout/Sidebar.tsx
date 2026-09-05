@@ -65,7 +65,6 @@ export function Sidebar() {
       name: "SECURITY & AUDIT",
       items: [
         { name: "Security Center", href: "/security", icon: ShieldCheck },
-        { name: "Global Verify", href: "/verify", icon: ScanText },
         { name: "Verify Documents", href: "/verify-documents", icon: ClipboardCheck, roles: ["LEGAL_OFFICER", "SUPER_ADMIN"] },
         { name: "Audit Trail", href: "/audit", icon: ListOrdered },
       ]
@@ -85,7 +84,6 @@ export function Sidebar() {
     }
   ], []);
 
-  // Filter groups by role
   const visibleGroups = navigationGroups.filter(g => {
     if (!g.roles) return true;
     return g.roles.includes(userRole);
@@ -103,7 +101,7 @@ export function Sidebar() {
 
   return (
     <aside id="sidebar" className="w-[260px] bg-surface border-r border-border hidden md:flex flex-col h-full shrink-0 relative z-20">
-      {/* Brand */}
+      
       <div className="h-16 flex items-center px-5 border-b border-border shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
           <div className="w-7 h-7 rounded bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:border-accent/40 transition-colors">
@@ -113,7 +111,7 @@ export function Sidebar() {
         </Link>
       </div>
       
-      {/* Navigation */}
+      
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-4">
         <nav className="px-3 space-y-5">
           {visibleGroups.map((group) => (
@@ -177,7 +175,7 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* System Status */}
+      
       <div className="px-4 py-3 border-t border-border shrink-0">
         <div className="flex items-center gap-2.5 px-1">
           <div className="relative flex h-2 w-2">

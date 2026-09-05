@@ -31,11 +31,9 @@ export default function NewCasePage() {
     setLoading(true);
     setError(null);
     try {
-      // 1. Create the Case
       const res = await api.post("/cases/", formData);
       const caseId = res.data.id;
 
-      // 2. Upload the FIR Document linked to this Case
       const docFormData = new FormData();
       docFormData.append('file', firFile);
       docFormData.append('title', `FIR - ${formData.title}`);
@@ -51,7 +49,7 @@ export default function NewCasePage() {
       router.push(`/cases/${caseId}`);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || err.response?.data?.error || "Failed to create case and register FIR.");
+      setError(err.response?.data?.detail || err.response?.data?.title?.[0] || err.response?.data?.error || "Failed to create case and register FIR.");
       setLoading(false);
     }
   };

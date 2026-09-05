@@ -28,21 +28,31 @@ export function CaseDetailHeader({ caseData, isGenerating, reportGenerated, onGe
             {caseData.confidentiality_level.replace('_', ' ')}
           </span>
           
-          <select 
-            value={caseData.status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-widest border outline-none bg-transparent ${
-              caseData.status === 'UNDER_INVESTIGATION' ? 'text-status-warning border-status-warning/20 bg-status-warning/10' : 
-              caseData.status === 'OPEN' || caseData.status === 'ACTIVE' ? 'text-status-verification border-status-verification/20 bg-status-verification/10' : 
-              'text-content-muted border-border bg-surface'
-            }`}
-          >
-            <option value="OPEN">OPEN</option>
-            <option value="UNDER_INVESTIGATION">UNDER INVESTIGATION</option>
-            <option value="CLOSED">CLOSED</option>
-            <option value="ARCHIVED">ARCHIVED</option>
-          </select>
-        </div>
+            <select 
+              value={caseData.status}
+              onChange={(e) => onStatusChange(e.target.value)}
+              className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-widest border outline-none bg-transparent ${
+                caseData.status === 'UNDER_INVESTIGATION' ? 'text-status-warning border-status-warning/20 bg-status-warning/10' : 
+                caseData.status === 'OPEN' || caseData.status === 'ACTIVE' ? 'text-status-verification border-status-verification/20 bg-status-verification/10' : 
+                'text-content-muted border-border bg-surface'
+              }`}
+            >
+              <option value="OPEN">OPEN</option>
+              <option value="UNDER_INVESTIGATION">UNDER INVESTIGATION</option>
+              <option value="CLOSED">CLOSED</option>
+              <option value="ARCHIVED">ARCHIVED</option>
+            </select>
+
+            {caseData.verification_status && (
+              <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold tracking-widest border ${
+                caseData.verification_status === 'VERIFIED' ? 'bg-status-verification/10 text-status-verification border-status-verification/20' : 
+                caseData.verification_status === 'FLAGGED' ? 'bg-status-warning/10 text-status-warning border-status-warning/20' : 
+                'bg-surface text-content-muted border-border'
+              }`}>
+                {caseData.verification_status.replace('_', ' ')}
+              </span>
+            )}
+          </div>
         <p className="text-content-secondary text-lg font-medium tracking-wide">{caseData.title}</p>
       </div>
       <div className="flex gap-3">

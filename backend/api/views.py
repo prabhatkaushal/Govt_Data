@@ -14,12 +14,20 @@ from cryptography.fernet import Fernet
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+from .permissions import IsInvestigator, IsLegalOfficer, IsSuperAdmin
 import threading
 import requests
 
 def trigger_ai_pipeline(file_data, file_name, document_id):
     try:
-        print(f"Triggering AI pipeline for {document_id}")
         files = {'file': (file_name, file_data)}
         ai_url = os.environ.get("AI_MICROSERVICE_URL", "http://localhost:8001")
         ext_res = requests.post(f"{ai_url}/extract-text/", files=files)
@@ -28,18 +36,17 @@ def trigger_ai_pipeline(file_data, file_name, document_id):
             if text.strip():
                 payload = {"document_id": document_id, "text": text}
                 emb_res = requests.post(f"{ai_url}/generate-embeddings/", json=payload)
-                print("Embeddings generated:", emb_res.json())
-            else:
-                print("No text extracted.")
-        else:
-            print("Extract text failed:", ext_res.status_code)
     except Exception as e:
-        print("AI Pipeline failed:", e)
+        pass
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated(), IsSuperAdmin()]
+        return [permissions.IsAuthenticated()]
 
     def perform_create(self, serializer):
         validated_data = serializer.validated_data
@@ -48,7 +55,6 @@ class UserViewSet(viewsets.ModelViewSet):
         department = validated_data.get('department')
         if department and department.department_code:
             try:
-                # e.g., 'CYB-01' -> '01'
                 dd_str = "".join(filter(str.isdigit, department.department_code))
                 if len(dd_str) >= 2:
                     dd = dd_str[-2:]
@@ -102,7 +108,6 @@ class CaseViewSet(viewsets.ModelViewSet):
         )
 
     def destroy(self, request, *args, **kwargs):
-        # Only Admin or Super Admin can delete cases
         if request.user.role not in ['ADMIN', 'SUPER_ADMIN']:
             return Response(
                 {"error": "Only Administrators are authorized to permanently delete cases."},
@@ -111,17 +116,38 @@ class CaseViewSet(viewsets.ModelViewSet):
             
         instance = self.get_object()
         
-        # Log to Audit Trail BEFORE deletion
         AuditLog.objects.create(
             action="DELETE_CASE",
             actor=request.user,
             resource_type="CASE",
-            resource_id=instance.case_number,
+            resource_id=instance.case_number,    ip_address=get_client_ip(request),
+
             metadata_info={"description": f"Case '{instance.title}' permanently deleted from database by Admin."}
         )
         
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsLegalOfficer])
+    def verify(self, request, pk=None):
+        from django.utils import timezone
+        case = self.get_object()
+        if case.verification_status == 'VERIFIED':
+            return Response({"error": "Case is already verified"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        case.verification_status = 'VERIFIED'
+        case.save()
+        
+        AuditLog.objects.create(
+            action="CASE_VERIFIED",
+            actor=request.user,
+            resource_type="CASE",
+            resource_id=case.case_number,    ip_address=get_client_ip(request),
+
+            metadata_info={"description": f"Case '{case.title}' independently verified by {request.user.full_name}"}
+        )
+        
+        return Response({"status": "verified"})
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
@@ -132,18 +158,29 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from django.utils import timezone
         qs = Document.objects.all()
-        # If explicitly requesting deleted files (Recycle Bin)
         if self.request.query_params.get('deleted') == 'true':
             return qs.filter(status='DELETED')
-        # Allow retrieving specific deleted object for restore action
         if self.action in ['restore', 'retrieve']:
             return qs
-        # Otherwise hide DELETED files from normal views
         return qs.exclude(status='DELETED')
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        AuditLog.objects.create(
+            action="DOCUMENT_VIEWED",
+            actor=request.user,
+            resource_type="DOCUMENT",
+            resource_id=instance.document_id,    ip_address=get_client_ip(request),
+
+            metadata_info={"description": f"Document '{instance.file_name}' viewed by {request.user.username}."}
+        )
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         from django.utils import timezone
-        # 1. Enforce Admin only
         if request.user.role not in ['ADMIN', 'SUPER_ADMIN']:
             return Response(
                 {"error": "Only Administrators are authorized to delete documents."},
@@ -152,18 +189,17 @@ class DocumentViewSet(viewsets.ModelViewSet):
             
         instance = self.get_object()
         
-        # Soft Delete Logic
         instance.status = 'DELETED'
         instance.deleted_at = timezone.now()
         instance.deleted_by = request.user
         instance.save()
         
-        # 2. Log to Audit Trail
         AuditLog.objects.create(
             action="FILE_DELETED",
             actor=request.user,
             resource_type="DOCUMENT",
-            resource_id=instance.document_id,
+            resource_id=instance.document_id,    ip_address=get_client_ip(request),
+
             metadata_info={"description": f"Document '{instance.file_name}' moved to Recycle Bin by Admin."}
         )
         
@@ -181,7 +217,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if instance.status != 'DELETED':
             return Response({"error": "Document is not deleted."}, status=status.HTTP_400_BAD_REQUEST)
             
-        # Restore Logic (Revert to verified if it was verified, else pending)
         instance.status = 'VERIFIED' if instance.verified_by else 'PENDING_VERIFICATION'
         instance.deleted_at = None
         instance.deleted_by = None
@@ -191,12 +226,29 @@ class DocumentViewSet(viewsets.ModelViewSet):
             action="FILE_RESTORED",
             actor=request.user,
             resource_type="DOCUMENT",
-            resource_id=instance.document_id,
+            resource_id=instance.document_id,    ip_address=get_client_ip(request),
+
             metadata_info={"description": f"Document '{instance.file_name}' restored from Recycle Bin by Admin."}
         )
         return Response({"status": "restored"})
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsInvestigator])
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        instance = self.get_object()
+        
+        update_type = "Modified" if kwargs.get('partial', False) else "Replaced metadata for"
+        
+        AuditLog.objects.create(
+            action="DOCUMENT_UPDATED",
+            actor=request.user,
+            resource_type="DOCUMENT",
+            resource_id=instance.document_id,    ip_address=get_client_ip(request),
+
+            metadata_info={"description": f"{update_type} document '{instance.file_name}'."}
+        )
+        return response
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsLegalOfficer])
     def flag(self, request, pk=None):
         from django.utils import timezone
         instance = self.get_object()
@@ -212,42 +264,40 @@ class DocumentViewSet(viewsets.ModelViewSet):
             action="FILE_FLAGGED",
             actor=request.user,
             resource_type="DOCUMENT",
-            resource_id=instance.document_id,
+            resource_id=instance.document_id,    ip_address=get_client_ip(request),
+
             metadata_info={"description": f"Document flagged as Suspicious.", "reason": reason}
         )
         return Response({"status": "flagged"})
 
-    parser_classes = [MultiPartParser, FormParser]
+    from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def create(self, request, *args, **kwargs):
-        # Phase 1: Real SHA-256 and Mocked AES-256 (Simulated S3 Storage)
         file_obj = request.FILES.get('file')
         if not file_obj:
             return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
         
         file_name = file_obj.name
         existing_doc = Document.objects.filter(file_name=file_name).first()
+        is_replacement = False
         if existing_doc:
             if request.POST.get('replace') == 'true':
+                is_replacement = True
                 existing_doc.delete()
             else:
                 return Response({"error": "File with this name already exists", "code": "DUPLICATE_NAME"}, status=status.HTTP_409_CONFLICT)
 
-        # Calculate true SHA-256
         file_hash = hashlib.sha256()
         for chunk in file_obj.chunks():
             file_hash.update(chunk)
         sha256_hex = file_hash.hexdigest()
         
-        # Reset file pointer
         file_obj.seek(0)
         
-        # Mock AES-256 encryption and saving to S3
-        # In a real scenario, this key would be in settings.py
         key = Fernet.generate_key()
         cipher = Fernet(key)
         
-        # Read file, encrypt, and save to mock S3 directory
         file_data = file_obj.read()
         encrypted_data = cipher.encrypt(file_data)
         
@@ -265,9 +315,16 @@ class DocumentViewSet(viewsets.ModelViewSet):
         file_obj.seek(0)
         unencrypted_data = file_obj.read()
         threading.Thread(target=trigger_ai_pipeline, args=(unencrypted_data, file_name, doc_id)).start()
-        
-        # Add the computed fields to the request data
         mutable_data = request.data.copy()
+        
+        case_val = mutable_data.get('case')
+        if case_val and isinstance(case_val, str) and case_val.startswith('CASE-'):
+            try:
+                case_obj = Case.objects.get(case_number=case_val)
+                mutable_data['case'] = case_obj.id
+            except Case.DoesNotExist:
+                return Response({"error": f"Case {case_val} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
         mutable_data['document_id'] = doc_id
         mutable_data['file_path'] = file_path
         mutable_data['file_name'] = file_name
@@ -276,16 +333,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
         mutable_data['mime_type'] = file_obj.content_type
         
         serializer = self.get_serializer(data=mutable_data)
-        if not serializer.is_valid():
-            print("VALIDATION ERROR:", serializer.errors)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
         doc_instance = serializer.instance
         
-        # If document_type is FIR, create FIR record
         if doc_instance.document_type == 'FIR' and doc_instance.case:
-            # Enforce 1 FIR per Case
             if FIR.objects.filter(case=doc_instance.case).exists():
                 doc_instance.delete()
                 return Response({"error": "This case already has an FIR. Only one FIR per case is allowed.", "code": "MULTIPLE_FIR"}, status=status.HTTP_400_BAD_REQUEST)
@@ -294,8 +347,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 case=doc_instance.case,
                 document=doc_instance
             )
-        
-        # Phase 3: Simulated Hyperledger Fabric Blockchain Logging
         BlockchainRecord.objects.create(
             document=doc_instance,
             transaction_id=f"TXN-{uuid.uuid4().hex}",
@@ -307,11 +358,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
         )
         
         AuditLog.objects.create(
-            action="UPLOAD_DOCUMENT",
+            action="DOCUMENT_REPLACED" if is_replacement else "UPLOAD_DOCUMENT",
             actor=request.user,
             resource_type="DOCUMENT",
-            resource_id=doc_id,
-            metadata_info={"description": f"Document {file_name} encrypted (AES-256) and uploaded to mock-S3. SHA256: {sha256_hex[:12]}..."}
+            resource_id=doc_id,    ip_address=get_client_ip(request),
+
+            metadata_info={"description": f"Document {file_name} {'replaced (modified)' if is_replacement else 'uploaded'} and encrypted (AES-256). SHA256: {sha256_hex[:12]}..."}
         )
         
         headers = self.get_success_headers(serializer.data)
@@ -333,7 +385,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
         doc.verified_at = timezone.now()
         doc.save()
         
-        # Add a digital signature and audit log automatically
         DigitalSignature.objects.create(
             document=doc,
             signed_by=request.user,
@@ -344,7 +395,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
             action="FILE_VERIFIED",
             actor=request.user,
             resource_type="DOCUMENT",
-            resource_id=doc.document_id,
+            resource_id=doc.document_id,    ip_address=get_client_ip(request),
+
             metadata_info={"description": f"Document {doc.document_id} verified by {request.user.full_name}"}
         )
         

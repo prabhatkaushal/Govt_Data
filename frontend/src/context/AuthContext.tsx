@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (idNumber: string, passcode: string) => {
     try {
-      // idNumber acts as username
       const res = await api.post("/auth/login/", { username: idNumber, password: passcode });
       const { access, refresh, user: userData } = res.data;
       

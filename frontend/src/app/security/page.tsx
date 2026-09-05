@@ -131,7 +131,7 @@ export default function SecurityPage() {
                 <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                   {blocks.map((block, i) => (
                     <div key={block.id} className="relative flex items-start gap-4">
-                      {/* Connection Line */}
+                      
                       {i !== blocks.length - 1 && (
                         <div className="absolute left-[11px] top-6 w-[2px] h-full bg-border -z-10" />
                       )}

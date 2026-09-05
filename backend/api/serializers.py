@@ -21,12 +21,20 @@ class UserSerializer(serializers.ModelSerializer):
     department_id = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(), source='department', write_only=True, required=False, allow_null=True
     )
-    username = serializers.CharField(read_only=True)
-    password = serializers.CharField(write_only=True, required=False)
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'password', 'email', 'full_name', 'role', 'department', 'department_id', 'employee_id']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = super().create(validated_data)
+        if password:
+            user.set_password(password)
+            user.save()
+        return user
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploader = UserSerializer(source="uploaded_by", read_only=True)
@@ -47,7 +55,6 @@ class CaseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_documents(self, obj):
-        # Exclude deleted documents when retrieving case details
         docs = obj.documents.exclude(status='DELETED')
         return DocumentSerializer(docs, many=True).data
 

@@ -82,7 +82,7 @@ export default function DashboardPage() {
   return (
     <motion.div className="space-y-10 max-w-[1600px]" variants={stagger} initial="hidden" animate="show">
       
-      {/* Header */}
+      
       <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-content-primary tracking-tight">Command Center</h1>
@@ -93,10 +93,10 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* KPI Row */}
+      
       <DashboardStats stats={stats} />
 
-      {/* Quick Actions */}
+      
       <motion.div variants={fadeUp} className="flex flex-wrap gap-2">
         {[
           { label: "New Case", icon: Plus, href: "/cases/new", primary: true },
@@ -120,20 +120,20 @@ export default function DashboardPage() {
       </motion.div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-        {/* Active Investigations + Recent Activity */}
+        
         <div className="xl:col-span-8 space-y-10">
           
-          {/* Active Investigations */}
+          
           <ActiveCasesTable cases={cases} />
 
-          {/* Recent Activity */}
+          
           <RecentActivityFeed recentActivity={recentActivity} />
         </div>
 
-        {/* Right Column: Security + System Status */}
+        
         <div className="xl:col-span-4 space-y-8">
           
-          {/* Security Status */}
+          
           <motion.div variants={fadeUp} className="bg-surface border border-border rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase flex items-center gap-2">
@@ -167,7 +167,7 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          {/* Quick Stats */}
+          
           <motion.div variants={fadeUp}>
             <h2 className="text-[10px] font-bold text-content-muted tracking-[0.2em] uppercase mb-4">
               Data Integrity

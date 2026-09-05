@@ -40,7 +40,6 @@ export default function SearchPage() {
     setHasSearched(true);
     
     try {
-      // Import api locally since it wasn't imported at top-level
       const api = (await import('@/services/api')).default;
       const [casesRes, docsRes] = await Promise.all([
         api.get('/cases/'),
