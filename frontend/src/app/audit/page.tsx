@@ -28,7 +28,7 @@ export default function AuditPage() {
   React.useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/audit-logs/', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/audit-logs/`, {
           headers: {
             'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`
           }

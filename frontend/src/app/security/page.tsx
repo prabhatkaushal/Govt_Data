@@ -27,7 +27,7 @@ export default function SecurityPage() {
   React.useEffect(() => {
     const fetchBlocks = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/blockchain/', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/blockchain/`, {
           headers: {
             'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`
           }

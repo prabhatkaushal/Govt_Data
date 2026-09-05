@@ -26,7 +26,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   useEffect(() => {
     if (docData) {
       setIsLoadingText(true);
-      fetch(`http://localhost:8001/document-text/?document_id=${docData.document_id}`)
+      fetch(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8001'}/document-text/?document_id=${docData.document_id}`)
         .then(res => res.json())
         .then(data => setFullText(data.text))
         .catch(() => setFullText("Failed to load text."))
@@ -45,7 +45,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
     if (!docData) return;
     setIsSummarizing(true);
     try {
-      const res = await fetch(`http://localhost:8001/summarize/?document_id=${docData.document_id}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8001'}/summarize/?document_id=${docData.document_id}`);
       const data = await res.json();
       setSummary(data.summary);
     } catch (err) {
