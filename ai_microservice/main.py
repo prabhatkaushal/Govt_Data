@@ -25,9 +25,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-logger.info("Loading sentence-transformer model (all-MiniLM-L6-v2)...")
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
-logger.info("Model loaded successfully.")
+MOCK_AI = os.environ.get("USE_REAL_AI", "false").lower() != "true"
+if MOCK_AI:
+    logger.info("Using Mock Embedder to save memory (512MB limit on Render).")
+    class MockEmbedder:
+        def encode(self, texts):
+            # Return random embeddings of dimension 384 (same as all-MiniLM-L6-v2)
+            return [np.random.rand(384).astype(np.float32) for _ in texts]
+    embedder = MockEmbedder()
+else:
+    logger.info("Loading sentence-transformer model (all-MiniLM-L6-v2)...")
+    embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    logger.info("Model loaded successfully.")
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'backend', 'db.sqlite3')
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
