@@ -6,7 +6,6 @@ services:
     plan: free
     dockerContext: .
     dockerfilePath: ./backend/Dockerfile
-    preDeployCommand: python manage.py migrate && python manage.py seed_data
     envVars:
       - key: DATABASE_URL
         fromDatabase:
