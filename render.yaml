@@ -1,9 +1,9 @@
 services:
-  # 1. Backend (Django)
   - type: web
     name: secura-backend
     env: docker
     region: oregon
+    plan: free
     dockerContext: .
     dockerfilePath: ./backend/Dockerfile
     preDeployCommand: python manage.py migrate && python manage.py seed_data
@@ -18,12 +18,14 @@ services:
         value: https://secura-ai.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      - key: DJANGO_DEBUG
+        value: 'False'
 
-  # 2. Frontend (Next.js)
   - type: web
     name: secura-frontend
     env: docker
     region: oregon
+    plan: free
     dockerContext: .
     dockerfilePath: ./frontend/Dockerfile
     envVars:
@@ -32,16 +34,15 @@ services:
       - key: NEXT_PUBLIC_AI_URL
         value: https://secura-ai.onrender.com
 
-  # 3. AI Microservice (FastAPI)
   - type: web
     name: secura-ai
     env: docker
     region: oregon
+    plan: free
     dockerContext: .
     dockerfilePath: ./ai_microservice/Dockerfile
 
 databases:
-  # Managed PostgreSQL
   - name: secura-db
     databaseName: secura
     user: secura_user
